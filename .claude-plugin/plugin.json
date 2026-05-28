@@ -1,0 +1,11 @@
+{
+  "name": "cc-guard",
+  "description": "772 safety hooks for Claude Code — prevent file deletion, credential leaks, git disasters, and token waste during autonomous AI coding sessions",
+  "version": "1.0.0",
+  "author": {
+    "name": "gaebalai"
+  },
+  "homepage": "https://claudecode.to/cc-guard/",
+  "repository": "https://github.com/gaebalai/cc-guard",
+  "license": "MIT"
+}

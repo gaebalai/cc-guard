@@ -1,0 +1,12 @@
+__pycache__/
+.claude/checkpoints/
+.claude/pre-compact-checkpoint.md
+.claude/session-snapshot.md
+.claude/session-state.md
+.claude/session-logs/
+cc-guard-export.json
+test.sh.tmp
+test.sh.new_tests
+test.sh.patch
+node_modules/
+.DS_Store

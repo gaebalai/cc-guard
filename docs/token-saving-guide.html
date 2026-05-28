@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code 토큰 절약 가이드 — 800시간 운용 데이터 기반의 실전 방법</title>
+<meta name="description" content="Claude Code의 토큰 소비를 절반으로 줄이는 방법. Opus 4.7에서 최대 35% 증가한 토큰 비용에 대한 대책. CLAUDE.md 최적화, hook 활용, 모델 선택의 실측 데이터.">
+<meta name="keywords" content="Claude Code, 토큰 절약, 토큰 소비, Opus 4.7, 비용 절감, hook, CLAUDE.md, 최적화">
+<link rel="canonical" href="https://claudecode.to/cc-guard/token-saving-guide.html">
+<meta property="og:title" content="Claude Code 토큰 절약 가이드 — 실측 데이터 기반의 방법">
+<meta property="og:description" content="800시간 운용 데이터에서 밝혀진 토큰 소비의 실태와 대책. Opus 4.7 대응.">
+<meta property="og:type" content="article">
+<meta property="og:locale" content="ko_KR">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"HowTo","name":"Claude Code의 토큰 소비를 절약하는 방법","description":"800시간 운용 데이터 기반의 Claude Code 토큰 최적화 가이드","step":[{"@type":"HowToStep","name":"CLAUDE.md를 최적화한다","text":"CLAUDE.md를 200줄 이하로 줄이고, 절차는 Skills로 옮긴다"},{"@type":"HowToStep","name":"hook으로 토큰 낭비를 방지한다","text":"read-budget-guard나 token-budget-guard로 자동 제어한다"},{"@type":"HowToStep","name":"모델을 구분해 사용한다","text":"일상 태스크는 Sonnet, Opus는 복잡한 설계 판단에만 사용한다"},{"@type":"HowToStep","name":"컨텍스트를 관리한다","text":"/clear로 태스크 전환, /compact로 압축, PreCompact hook으로 자동 저장"}]}
+</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans',sans-serif;background:#0d1117;color:#c9d1d9;padding:2rem;line-height:1.8;max-width:800px;margin:0 auto}
+h1{color:#f0f6fc;margin-bottom:.5rem;font-size:1.6rem}
+h2{color:#f0f6fc;margin:2rem 0 .8rem;border-bottom:1px solid #30363d;padding-bottom:.4rem;font-size:1.2rem}
+h3{color:#f0f6fc;margin:1.2rem 0 .5rem;font-size:1rem}
+p{margin:.8rem 0}
+a{color:#58a6ff;text-decoration:none}
+a:hover{text-decoration:underline}
+code{background:#161b22;padding:2px 6px;border-radius:4px;font-size:.9rem}
+pre{background:#161b22;padding:1rem;border-radius:8px;overflow-x:auto;margin:1rem 0;border:1px solid #30363d}
+pre code{background:none;padding:0}
+.stat{display:inline-block;background:#161b22;border:1px solid #30363d;border-radius:8px;padding:.8rem 1.2rem;margin:.3rem;text-align:center}
+.stat-num{font-size:1.5rem;color:#f0f6fc;font-weight:700}
+.stat-label{font-size:.75rem;color:#8b949e}
+.tip{background:#1c2128;border-left:3px solid #58a6ff;padding:.8rem 1rem;margin:1rem 0;border-radius:0 6px 6px 0;font-size:.9rem}
+.tip-warn{border-color:#d29922}
+.tip-danger{border-color:#f85149}
+.cta{background:#161b22;border:2px solid #238636;border-radius:12px;padding:1.5rem;margin:2rem 0;text-align:center}
+.cta h3{color:#f0f6fc;margin-bottom:.5rem}
+.cta p{color:#8b949e;font-size:.85rem;margin-bottom:1rem}
+.cta .btn{display:inline-block;background:#238636;color:#fff;padding:.6rem 1.5rem;border-radius:8px;text-decoration:none;font-weight:600;font-size:.9rem}
+.cta .btn:hover{background:#2ea043;text-decoration:none}
+.cta .btn-outline{display:inline-block;border:1px solid #30363d;color:#58a6ff;padding:.5rem 1rem;border-radius:8px;text-decoration:none;font-size:.85rem;margin:.3rem}
+nav{margin-bottom:2rem;font-size:.85rem;color:#8b949e}
+footer{text-align:center;color:#484f58;font-size:.7rem;margin-top:3rem;padding-top:1rem;border-top:1px solid #21262d}
+table{width:100%;border-collapse:collapse;margin:1rem 0}
+th,td{padding:.5rem .8rem;border:1px solid #30363d;text-align:left;font-size:.85rem}
+th{background:#161b22;color:#f0f6fc}
+</style>
+</head>
+<body>
+<nav><a href="index.html">cc-guard</a> / <a href="hub.html">Tools</a> / 토큰 절약 가이드</nav>
+
+<h1>Claude Code 토큰 절약 가이드</h1>
+<p style="color:#8b949e;margin-bottom:1.5rem">800시간 자율 운용 데이터 기반의 실측 절약 방법.</p>
+
+<div style="text-align:center;margin:1.5rem 0">
+<div class="stat"><div class="stat-num">$13</div><div class="stat-label">개발자 1인당 일평균 비용<br>(<a href="https://code.claude.com/docs/en/costs">공식 데이터</a>)</div></div>
+<div class="stat"><div class="stat-num">$150-250</div><div class="stat-label">월간 비용/인</div></div>
+<div class="stat"><div class="stat-num">+35%</div><div class="stat-label">Opus 4.7의 토큰 증가<br>(신규 tokenizer)</div></div>
+</div>
+
+<h2>1. 토큰은 어디서 소모되는가</h2>
+
+<p>800시간 운용 데이터로 밝혀진 토큰 소비 내역:</p>
+
+<table>
+<tr><th>소비처</th><th>비율</th><th>대책의 효과</th></tr>
+<tr><td>CLAUDE.md / 지시문</td><td>15-30%</td><td>200줄→35줄로 최대 50% 절감</td></tr>
+<tr><td>파일 읽기</td><td>25-30%</td><td>read-budget-guard로 제어 가능</td></tr>
+<tr><td>코드 생성</td><td>20-25%</td><td>모델 선택으로 최적화</td></tr>
+<tr><td>툴 스키마 / MCP</td><td>12-20%</td><td>미사용 MCP 비활성화</td></tr>
+<tr><td>대화 이력 / compaction</td><td>10-25%</td><td>/clear, /compact로 관리</td></tr>
+</table>
+
+<div class="tip">
+<strong>최대의 발견:</strong> CLAUDE.md가 100줄을 넘으면 매 턴의 토큰 비용이 급증한다. 35줄 템플릿으로도 같은 효과를 얻을 수 있다는 사실이 밝혀졌다.
+</div>
+
+<h2>2. CLAUDE.md 최적화 (효과가 가장 큰 항목)</h2>
+
+<p>CLAUDE.md는 <strong>매 턴</strong> 컨텍스트에 읽힌다. 100줄짜리 CLAUDE.md는 30턴 세션에서 약 75,000토큰을 소비한다.</p>
+
+<h3>5가지 최적화 패턴</h3>
+
+<ol style="margin-left:1.5rem">
+<li><strong>허용 리스트 방식</strong>: "~하지 마라" 나열 → "~만 허용"으로 변환</li>
+<li><strong>구체적인 예는 1개만</strong>: 3가지 예보다 1개의 정확한 예가 낫다</li>
+<li><strong>이유는 1줄</strong>: "왜"를 1줄로. 긴 설명은 Skill로 이동</li>
+<li><strong>테이블 형식</strong>: 글머리 기호보다 테이블이 토큰 효율이 높다</li>
+<li><strong>hook에 위임</strong>: 강제 규칙은 CLAUDE.md가 아닌 hook으로 구현</li>
+</ol>
+
+<pre><code># 최적화된 CLAUDE.md (35줄 예시)
+# Project: my-app
+
+## Rules
+- Test before commit (hook enforced)
+- No force-push (hook enforced)
+- TypeScript strict mode
+
+## Architecture
+| Layer | Tech | Notes |
+|-------|------|-------|
+| API | Express + Zod | /src/api/ |
+| DB | Prisma + Postgres | /prisma/ |
+| Auth | JWT + bcrypt | /src/auth/ |
+
+## Conventions
+- Files: kebab-case
+- Functions: camelCase
+- One export per file</code></pre>
+
+<h2>3. hook으로 토큰 낭비 자동 방지</h2>
+
+<p>hook은 Claude Code의 동작을 감시하고 토큰 낭비를 방지한다.</p>
+
+<pre><code># 10초 만에 설치
+npx cc-guard</code></pre>
+
+<h3>토큰 절약에 효과적인 hook</h3>
+
+<table>
+<tr><th>Hook</th><th>효과</th></tr>
+<tr><td><code>read-budget-guard</code></td><td>파일 읽기 횟수를 제한. 같은 파일의 반복 읽기를 방지</td></tr>
+<tr><td><code>token-budget-guard</code></td><td>세션 내 토큰 소비에 상한선 설정</td></tr>
+<tr><td><code>pre-compact-checkpoint</code></td><td>compaction 전 git checkpoint를 자동 생성. 환각으로 인한 헛수고 방지</td></tr>
+<tr><td><code>context-monitor</code></td><td>컨텍스트 사용률을 단계적으로 경고. 75%에서 주의, 90%에서 위험</td></tr>
+</table>
+
+<div class="tip tip-warn">
+<strong>Opus 4.7 대책:</strong> 새 tokenizer로 같은 텍스트가 최대 35% 더 많은 토큰을 소비한다. <code>token-budget-guard</code>의 임계값을 기존 대비 70%로 설정하면 안전하다.
+</div>
+
+<h2>4. 모델 구분 사용</h2>
+
+<table>
+<tr><th>태스크</th><th>권장 모델</th><th>이유</th></tr>
+<tr><td>일상적인 코딩</td><td>Sonnet 4.6</td><td>Opus의 1/5 비용. 대부분의 태스크에 충분</td></tr>
+<tr><td>복잡한 설계 판단</td><td>Opus 4.7</td><td>높은 추론 능력이 필요한 경우에만</td></tr>
+<tr><td>서브 에이전트</td><td>Haiku</td><td>단순한 태스크에 고성능 모델은 불필요</td></tr>
+</table>
+
+<p><code>/model</code> 명령어로 세션 중 모델 전환 가능.</p>
+
+<h2>5. 컨텍스트 관리</h2>
+
+<ul style="margin-left:1.5rem">
+<li><strong><code>/clear</code></strong>: 태스크가 바뀌면 즉시 실행. 오래된 컨텍스트는 매 메시지마다 비용</li>
+<li><strong><code>/compact</code></strong>: 긴 세션을 압축. 커스텀 지시도 가능: <code>/compact 코드 변경점만 유지</code></li>
+<li><strong>2-3시간으로 구분</strong>: 너무 긴 세션은 compaction 정확도가 떨어진다</li>
+<li><strong>미사용 MCP 비활성화</strong>: <code>/mcp</code>로 확인. 쓰지 않는 서버는 토큰을 낭비한다</li>
+</ul>
+
+<div class="cta">
+<h3>더 자세히 배우고 싶은 분께</h3>
+<p>이 페이지는 개요다. 구체적인 설정 절차, before/after 데이터, 팀용 최적화, Opus 4.7 완전 대응의 상세 내용은:</p>
+<a href="https://github.com/gaebalai/cc-guard" class="btn">View on GitHub</a>
+<p style="margin-top:.8rem;font-size:.8rem">머리말 + 제1장 "토큰은 어디로 사라지는가" 무료 공개 중</p>
+<div style="margin-top:.8rem">
+<a href="token-checkup.html" class="btn-outline">무료 진단: Token Checkup</a>
+<a href="cost-calculator.html" class="btn-outline">비용 계산기</a>
+<a href="claudemd-analyzer.html" class="btn-outline">CLAUDE.md 분석</a>
+</div>
+</div>
+
+<h2>6. 자주 묻는 질문</h2>
+
+<h3>Q: Max Plan ($200/월)인데도 토큰이 부족하다</h3>
+<p>Max 20x도 1시간 만에 고갈됐다는 보고가 있다 (<a href="https://github.com/anthropics/claude-code/issues/23706">#23706</a>). 대부분의 원인은 CLAUDE.md의 비대화, 서브 에이전트 남용, 불필요한 MCP 서버다. 위 대책으로 유효 이용 시간을 2-3배로 늘릴 수 있다.</p>
+
+<h3>Q: Opus 4.7로 바꾸니 토큰 소비가 늘었다</h3>
+<p>새 tokenizer로 같은 입력에서 최대 35% 더 많은 토큰을 소비한다 (<a href="https://platform.claude.com/docs/en/about-claude/models/whats-new-claude-4-7">공식 문서</a>). 또한 thinking token이 늘고 출력도 많다. 대책: effort level 조정 (<code>/effort</code>), 일상 태스크는 Sonnet으로 전환.</p>
+
+<h3>Q: hook을 넣으면 세션이 느려지지 않나?</h3>
+<p>hook 실행 시간은 보통 10-50ms다. 토큰 절약 효과 (수천~수만 토큰/세션)와 비교하면 무시할 수 있다.</p>
+
+<footer>
+<p><a href="https://github.com/gaebalai/cc-guard">cc-guard</a> — 772 hooks / 9,228+ tests / 800시간 운용 데이터</p>
+<p>데이터는 2026년 4월 기준. Anthropic 공식 데이터와 자체 운용 데이터 기반.</p>
+</footer>
+</body>
+</html>

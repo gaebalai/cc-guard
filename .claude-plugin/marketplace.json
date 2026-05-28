@@ -1,0 +1,66 @@
+{
+  "name": "cc-guard",
+  "owner": {
+    "name": "gaebalai",
+    "email": "gaebalai@users.noreply.github.com"
+  },
+  "metadata": {
+    "description": "Safety hooks for Claude Code — 772 battle-tested hooks from 800+ hours of autonomous operation. Prevents rm -rf, force-push, credential leaks, unauthorized fund transfers, deny-rules bypass, and more.",
+    "version": "1.0.0",
+    "pluginRoot": "./plugins"
+  },
+  "plugins": [
+    {
+      "name": "safety-essentials",
+      "source": "./plugins/safety-essentials",
+      "description": "5 essential safety hooks: block rm -rf, force-push, hard-reset, env overwrites, and package publish. The minimum viable safety net.",
+      "version": "1.0.0",
+      "author": { "name": "gaebalai" },
+      "homepage": "https://claudecode.to/cc-guard/",
+      "repository": "https://github.com/gaebalai/cc-guard",
+      "license": "MIT",
+      "keywords": ["safety", "hooks", "rm-rf", "force-push", "env", "essential"],
+      "category": "safety",
+      "tags": ["beginner-friendly", "must-have", "pretooluse"]
+    },
+    {
+      "name": "git-protection",
+      "source": "./plugins/git-protection",
+      "description": "Git safety hooks: block force-push, protect main/master, prevent hard-reset, guard rebase, and auto-backup before destructive operations.",
+      "version": "1.0.0",
+      "author": { "name": "gaebalai" },
+      "homepage": "https://claudecode.to/cc-guard/",
+      "repository": "https://github.com/gaebalai/cc-guard",
+      "license": "MIT",
+      "keywords": ["git", "force-push", "main-branch", "reset", "rebase", "backup"],
+      "category": "safety",
+      "tags": ["git", "version-control", "pretooluse"]
+    },
+    {
+      "name": "credential-guard",
+      "source": "./plugins/credential-guard",
+      "description": "Protect secrets and credentials: block writes to .env files, detect API keys in commands, prevent hardcoded tokens, guard service account files.",
+      "version": "1.0.0",
+      "author": { "name": "gaebalai" },
+      "homepage": "https://claudecode.to/cc-guard/",
+      "repository": "https://github.com/gaebalai/cc-guard",
+      "license": "MIT",
+      "keywords": ["credentials", "secrets", "api-keys", "env", "tokens", "security"],
+      "category": "security",
+      "tags": ["credentials", "secrets", "pretooluse"]
+    },
+    {
+      "name": "token-guard",
+      "source": "./plugins/token-guard",
+      "description": "Token consumption guards: large-read warning (100KB+), read budget limit, subagent cap, and token budget tracking. Reduce waste by 20-40%.",
+      "version": "1.0.0",
+      "author": { "name": "gaebalai" },
+      "homepage": "https://github.com/gaebalai/cc-guard",
+      "repository": "https://github.com/gaebalai/cc-guard",
+      "license": "MIT",
+      "keywords": ["tokens", "cost", "budget", "optimization", "large-read", "subagent"],
+      "category": "optimization",
+      "tags": ["token-saving", "cost-reduction", "pretooluse", "posttooluse"]
+    }
+  ]
+}

@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://claudecode.to/cc-guard/sitemap.xml

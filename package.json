@@ -1,0 +1,53 @@
+{
+  "name": "@gaebalai/cc-guard",
+  "version": "1.0.0",
+  "description": "One command to make Claude Code safe. 772 example hooks + 8 built-in. 88 tracked incidents. 65-section Survival Guide. Token diagnosis. Works with Auto Mode.",
+  "main": "index.mjs",
+  "bin": {
+    "cc-guard": "index.mjs"
+  },
+  "keywords": [
+    "claude-code",
+    "claude",
+    "anthropic",
+    "ai",
+    "safety",
+    "hooks",
+    "autonomous",
+    "cli",
+    "pretooluse",
+    "guard",
+    "rm-rf",
+    "git-push",
+    "env",
+    "secrets",
+    "syntax-check",
+    "context-window",
+    "wsl",
+    "wsl2",
+    "auto-mode",
+    "defense-in-depth",
+    "force-push",
+    "secret-leak",
+    "destructive-command",
+    "claude-code-hooks",
+    "claude-code-safety"
+  ],
+  "scripts": {
+    "test": "bash test.sh"
+  },
+  "author": "gaebalai",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gaebalai/cc-guard.git"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "homepage": "https://claudecode.to/cc-guard/",
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/gaebalai"
+  }
+}

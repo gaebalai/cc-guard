@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code Failure-Mode Cluster Tracker</title>
+<meta name="description" content="Public tracker for Claude Code structural failure clusters: sub-agent observability, multi-account, AGENTS.md interop, Pro Max quota anomaly, TUI UX, permission matching, Skills metadata, v2.1.150 server-side prompt injection, AUP false-positive on Opus. Issue counts, reactions, defense hooks shipped, upstream status.">
+<meta property="og:title" content="Claude Code Failure-Mode Cluster Tracker">
+<meta property="og:description" content="Public tracker for seven structural failure clusters in Claude Code (Apr-May 2026): combined ~11,500 user reactions across 60+ issues, with cc-guard defense hooks shipped for most clusters.">
+<meta property="og:type" content="article">
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 1.5rem;
+  color: #1a1a1a;
+  line-height: 1.6;
+  background: #ffffff;
+}
+h1 { font-size: 1.85rem; line-height: 1.3; margin-bottom: 0.4rem; }
+h2 { font-size: 1.4rem; margin-top: 2.5rem; padding-bottom: 0.3rem; border-bottom: 2px solid #e5e7eb; }
+h3 { font-size: 1.15rem; margin-top: 1.8rem; color: #1e293b; }
+h4 { font-size: 1rem; margin-top: 1.2rem; margin-bottom: 0.3rem; color: #475569; }
+.subtitle { font-size: 1.05rem; color: #475569; margin-bottom: 1.2rem; }
+.lead {
+  background: #f1f5f9; border-left: 4px solid #2563eb;
+  padding: 1rem 1.2rem; border-radius: 0 6px 6px 0;
+  margin-bottom: 1.5rem; font-size: 0.96rem;
+}
+.lead strong { color: #1e3a8a; }
+.summary-table {
+  width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.92rem;
+}
+.summary-table th, .summary-table td {
+  padding: 0.55rem 0.7rem; border: 1px solid #e5e7eb; text-align: left; vertical-align: top;
+}
+.summary-table th { background: #f8fafc; font-weight: 600; }
+.summary-table tr:nth-child(even) td { background: #fafbfc; }
+.cluster {
+  margin-top: 2rem; padding: 1.2rem 1.4rem; border: 1px solid #e5e7eb;
+  border-radius: 8px; background: #fefefe;
+}
+.cluster-header {
+  display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between;
+  gap: 0.5rem; margin-bottom: 0.8rem;
+}
+.cluster-title { font-size: 1.2rem; font-weight: 600; color: #0f172a; }
+.cluster-status {
+  font-size: 0.78rem; padding: 0.2rem 0.55rem; border-radius: 12px; font-weight: 600;
+}
+.status-active { background: #fef3c7; color: #92400e; }
+.status-monitoring { background: #dbeafe; color: #1e40af; }
+.cluster-meta {
+  font-size: 0.88rem; color: #475569; margin-bottom: 0.8rem;
+}
+.cluster-meta span { display: inline-block; margin-right: 1.2rem; }
+.cluster-meta strong { color: #0f172a; }
+.cases-table {
+  width: 100%; border-collapse: collapse; font-size: 0.86rem; margin: 0.6rem 0;
+}
+.cases-table th, .cases-table td {
+  padding: 0.4rem 0.6rem; border: 1px solid #e5e7eb; text-align: left; vertical-align: top;
+}
+.cases-table th { background: #f8fafc; }
+.hooks-list {
+  background: #f0fdf4; border-left: 3px solid #16a34a;
+  padding: 0.7rem 1rem; margin: 0.8rem 0; font-size: 0.9rem; border-radius: 0 6px 6px 0;
+}
+.hooks-list a { color: #15803d; text-decoration: underline; }
+.cta-box {
+  background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%);
+  border: 1px solid #f59e0b; padding: 1.4rem 1.6rem; border-radius: 10px;
+  margin: 2.5rem 0; text-align: center;
+}
+.cta-box h2 { border-bottom: none; margin-top: 0; }
+.btn {
+  display: inline-block; background: #16a34a; color: white !important;
+  padding: 0.7rem 1.5rem; border-radius: 6px; text-decoration: none;
+  font-weight: 600; font-size: 1.02rem; margin: 0.4rem 0.3rem;
+}
+.btn:hover { background: #15803d; }
+.btn-secondary { background: #475569; }
+.btn-secondary:hover { background: #334155; }
+a { color: #2563eb; }
+a:hover { color: #1e3a8a; }
+code { background: #f1f5f9; padding: 0.1rem 0.35rem; border-radius: 3px; font-size: 0.88em; }
+.footnote { font-size: 0.85rem; color: #64748b; margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #e5e7eb; }
+.tag {
+  display: inline-block; background: #e0e7ff; color: #3730a3;
+  font-size: 0.78rem; padding: 0.15rem 0.5rem; border-radius: 10px; margin-right: 0.4rem;
+}
+</style>
+</head>
+<body>
+
+<h1>Claude Code Failure-Mode Cluster Tracker</h1>
+<p class="subtitle">Public registry of structural failure clusters in Claude Code, with first-detected dates, user reaction counts, operator-side defense hooks shipped, and upstream status. Updated as clusters evolve.</p>
+
+<div class="lead">
+A <strong>cluster</strong> here means a group of independent user-filed issues that share an architectural root cause but surface as different symptoms. Tracking clusters (rather than individual issues) is what <a href="https://claudecode.togaebalai/cc-guard">cc-guard</a> does monthly — this page is the public registry of what's currently being tracked, with evidence links so you can verify the cluster framing against the underlying issues yourself. Last updated: 2026-05-27.
+</div>
+
+<h2>The seven clusters being tracked (May 2026)</h2>
+
+<table class="summary-table">
+<thead>
+<tr>
+<th>Cluster</th>
+<th>Issues</th>
+<th>Reactions</th>
+<th>First detected</th>
+<th>Hooks shipped</th>
+<th>Upstream</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td>8</td>
+<td>~800</td>
+<td>2026-05-20</td>
+<td>4 (PRs #282, #283, #286, #298)</td>
+<td>Unresolved</td>
+</tr>
+<tr>
+<td><a href="#cluster-multi-account">Multi-account session management</a></td>
+<td>3</td>
+<td>1,178</td>
+<td>2025-09 (#18435)</td>
+<td>2 (PR #328: routing-preflight, billing-log)</td>
+<td>Unresolved (8+ months)</td>
+</tr>
+<tr>
+<td><a href="#cluster-agents-md">AGENTS.md interop</a></td>
+<td>2+</td>
+<td>5,405</td>
+<td>2025-04-21 (#6235)</td>
+<td>0 (operator-side route exists)</td>
+<td>Unresolved (13+ months)</td>
+</tr>
+<tr>
+<td><a href="#cluster-pro-max">Pro Max quota anomaly</a></td>
+<td>10</td>
+<td>~2,200</td>
+<td>2026-01-03 (#16157)</td>
+<td>2 (PRs #340, #342: drift/version detectors)</td>
+<td>Unresolved (5+ months)</td>
+</tr>
+<tr>
+<td><a href="#cluster-tui-ux">TUI / Terminal UX</a></td>
+<td>6</td>
+<td>~2,106</td>
+<td>2025-04-12 (#769)</td>
+<td>0 (operator-side terminal alternatives only)</td>
+<td>Unresolved (13+ months, area:tui label acknowledged)</td>
+</tr>
+<tr>
+<td><a href="#cluster-permission">Permission matching boundary</a></td>
+<td>25+ (30+ via meta-issue)</td>
+<td>~804</td>
+<td>2025-08 (#5140)</td>
+<td>1 partial (subagent-permission-mode-guard.sh)</td>
+<td>Unresolved (9+ months, meta-issue #30519 with no staff engagement)</td>
+</tr>
+<tr>
+<td><a href="#cluster-skills">Skills metadata and loading</a></td>
+<td>10+ (area:skills) + 20+ (area:agent-view related)</td>
+<td>~100+ (new, growth signal)</td>
+<td>2026-05 (label rollout 2026-05-17)</td>
+<td>1 (PR #357: skills-settings-validator)</td>
+<td>Unresolved (no staff engagement since label rollout)</td>
+</tr>
+<tr>
+<td><a href="#cluster-server-side-injection">Server-side prompt injection (v2.1.150+)</a></td>
+<td>42+ (co-occurring regression bundle) + #62061 (core)</td>
+<td>46+ (#62061 anchor)</td>
+<td>2026-05-24 (#62061)</td>
+<td>1 (PR #383: server-side-prompt-injection-detector)</td>
+<td>Acknowledged intentional (Anthropic same-day comment), 2 opt-out env vars provided, audit trail gap remains</td>
+</tr>
+<tr>
+<td><a href="#cluster-aup-false-positive">Usage Policy classifier over-trigger (AUP)</a></td>
+<td>25+ (filed 2026-05-18 to 2026-05-27)</td>
+<td>~40 (wide-and-thin reaction shape)</td>
+<td>2026-05-18 (#60366)</td>
+<td>1 (PR #388, #389: aup-false-positive-helper)</td>
+<td>Unresolved (no Anthropic comment, github-actions[bot] auto-grouped 3 duplicate chains)</td>
+</tr>
+<tr>
+<td><a href="#cluster-growthbook">GrowthBook A/B flag client-side overrides</a></td>
+<td>58 (2-week surge, filed 2026-05-14 onward)</td>
+<td>~30 (root-cause analysis in #62205)</td>
+<td>2026-05-25 (#62205)</td>
+<td>3 shipped advisory hooks (PR #402, #413, plus existing permission-mode-drift-guard); all observational, not preventive</td>
+<td>Unresolved (5 documented override paths; no Anthropic acknowledgment of the broader pattern)</td>
+</tr>
+<tr>
+<td><a href="#cluster-cowork">Cowork sandbox / Desktop remote-control failure surface</a></td>
+<td>195 (2-week window, filed 2026-05-14 onward, ~17/day pace)</td>
+<td>0-1 per issue (wide-and-thin; volume-driven cluster)</td>
+<td>2026-05-28 (cluster framing date)</td>
+<td>1 standalone script (cowork-claudemd-helper.sh, PR #403) + 3 shipped CLI-side hooks (PRs #409, #410, #411)</td>
+<td>Unresolved (4 sub-clusters: filesystem/mount/path, platform/binary mismatch, subscription/access boundary, infrastructure incident)</td>
+</tr>
+<tr>
+<td><a href="#cluster-tool-call-parsing">Tool Call Parsing failures in Opus 4.7</a></td>
+<td>5+ (filed 2026-04-17 to 2026-05-27; central case #62123 has 21 reactions)</td>
+<td>28+ (cumulative across 5 filings; 21 on #62123 alone)</td>
+<td>2026-05-25 (#62123)</td>
+<td>2 (PR #406: long-session-malformed-tool-call-detector for sub-pattern 12A; sub-pattern 12B: extended-thinking-tool-use-mismatch-detector)</td>
+<td>Unresolved (4 root-cause hypotheses: in-context few-shot poisoning, extended-thinking serialization defect, spurious malformed notice, legacy XML format mix)</td>
+</tr>
+</tbody>
+</table>
+
+<p style="font-size: 0.9rem; color: #475569;">Combined: <strong>~11,820 user reactions across 400+ issues</strong>, all twelve clusters currently open as of 2026-05-28. The combined volume exceeds the top-10 most-reacted issues in the entire repository.</p>
+
+<h2 id="cluster-soh">Cluster 1: Sub-Agent Observability (SOH)</h2>
+
+<div class="cluster">
+<div class="cluster-header">
+<span class="cluster-title">Subagent silent-failure cluster — 72-hour convergence window</span>
+<span class="cluster-status status-active">ACTIVE</span>
+</div>
+<div class="cluster-meta">
+<span><strong>Issues:</strong> 8</span>
+<span><strong>Reactions:</strong> ~800 (combined)</span>
+<span><strong>First filed:</strong> 2026-05-20</span>
+<span><strong>Cluster framing:</strong> 2026-05-23</span>
+</div>
+
+<p>Between 2026-05-20 21:48 UTC and 2026-05-22 09:05 UTC, six independent users filed issues describing the same architectural gap from different angles. A seventh case landed on 2026-05-22 evening, and an eighth case (parallel-Bash 14-hour silent gap) was filed 2026-05-25. All cases converge on four distinct sub-patterns of subagent failure, all rooted in the same surface-level observability gap.</p>
+
+<h4>The 7+1 cases</h4>
+<table class="cases-table">
+<thead><tr><th>Issue</th><th>Reporter</th><th>Sub-pattern</th><th>One-line summary</th></tr></thead>
+<tbody>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/60987">#60987</a></td><td>MarkAWard</td><td>silent stall</td><td>pty-less spawn → subprocess dies → parent reports "spawned successfully"</td></tr>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/61102">#61102</a></td><td>Awis13</td><td>scope expansion</td><td>subagent recommends, parent treats recommendation as authorization (~120GB deletion)</td></tr>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/61107">#61107</a></td><td>nvst18</td><td>dispatch fabrication</td><td>structurally correct code generated, validated input silently discarded in dead branch</td></tr>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/61167">#61167</a></td><td>nvst18</td><td>dispatch fabrication</td><td>OpenClaw deploy: "39 agents dispatched" narrated, session log shows 5 dispatched and 0 aggregated</td></tr>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/61315">#61315</a></td><td>mitselek</td><td>silent stall</td><td>MCP permission gate stops subagent indefinitely, no signal to parent UI</td></tr>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/61405">#61405</a></td><td>meefs</td><td>missing observation/control</td><td>12-hour subagent hang, no timeout / progress / abort primitive at Agent-tool surface</td></tr>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/61547">#61547</a></td><td>alanrezendeee</td><td>silent stall</td><td>subagent idle at entry-tool-dispatch gate (since confirmed: <code>bypassPermissions</code> not propagated from parent)</td></tr>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/62161">#62161</a></td><td>(independent)</td><td>missing observation/control</td><td>parallel-Bash 14-hour silent gap (8th case, 2026-05-25)</td></tr>
+</tbody>
+</table>
+
+<h4>Operator-side defenses shipped</h4>
+<div class="hooks-list">
+<strong>Four MIT defense hooks in cc-guard, one per sub-pattern:</strong>
+<ul style="margin: 0.4rem 0 0 1rem; padding: 0;">
+<li><a href="https://github.com/gaebalai/cc-guard/pull/283">PR #283 dispatch-receipt</a> — sub-pattern 1 (dispatch fabrication). Parent hook issues receipt at dispatch; closure refuses narratives without matching receipt.</li>
+<li><a href="https://github.com/gaebalai/cc-guard/pull/286">PR #286 dispatch-allowlist-preflight</a> — sub-pattern 2 (silent stall). Cross-checks allowlist before dispatch to prevent gate-induced stall.</li>
+<li><a href="https://github.com/gaebalai/cc-guard/pull/298">PR #298 dispatch-liveness-watchdog</a> — sub-pattern 3 (missing observation/control). Surfaces operator-side timeout/liveness windows on dispatch.</li>
+<li><a href="https://github.com/gaebalai/cc-guard/pull/282">PR #282 scope-expansion-receipt</a> — sub-pattern 4 (scope expansion). Re-checks authorization scope before parent acts on subagent recommendation.</li>
+</ul>
+</div>
+
+<h4>Reading material</h4>
+<p style="font-size: 0.93rem;">
+<a href="https://gist.github.com/gaebalai/9857a9ed407696ba8483b354917ff161">meta-analysis Gist</a> · <a href="https://gist.github.com/gaebalai/cf477f03f03d9f93c184f1fb7d894f96">nested-spawn cluster Gist</a> · <a href="https://github.com/anthropics/claude-code/issues/61993">issue #61993</a> (4-architecture convergence discussion).
+</p>
+
+<h4>Upstream status</h4>
+<p style="font-size: 0.93rem;">No upstream fix as of 2026-05-26. <a href="https://github.com/anthropics/claude-code/issues/62153">Issue #62153</a> tracks the IPC positive-path work. The four-architecture convergence (contract-vs-runtime, file-based handoff.md, hook-emitted receipts, separate-process dispatch) suggests the upstream fix surface is exposing ephemeral spawn primitives in nested contexts with a depth limit.</p>
+</div>
+
+<h2 id="cluster-multi-account">Cluster 2: Multi-account session management</h2>
+
+<div class="cluster">
+<div class="cluster-header">
+<span class="cluster-title">Three-surface multi-account primitive absence</span>
+<span class="cluster-status status-active">ACTIVE (8+ months)</span>
+</div>
+<div class="cluster-meta">
+<span><strong>Issues:</strong> 3</span>
+<span><strong>Reactions:</strong> 1,178 (combined)</span>
+<span><strong>First filed:</strong> 2025-09 (#18435)</span>
+<span><strong>Cluster framing:</strong> 2026-05-26</span>
+</div>
+
+<p>Three independent users on three different surfaces (desktop, web, mobile) filed separate issues describing the same primitive absence — Claude Code provides no way to manage multiple accounts simultaneously. Surface symptoms differ; the architectural gap is identical.</p>
+
+<h4>The cases</h4>
+<table class="cases-table">
+<thead><tr><th>Issue</th><th>Reporter</th><th>Surface</th><th>Reactions</th></tr></thead>
+<tbody>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/18435">#18435</a></td><td>Agentic-Marketer</td><td>Desktop app</td><td>542</td></tr>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/27302">#27302</a></td><td>nathanmargaglio</td><td>Web app (Connectors)</td><td>327</td></tr>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/36151">#36151</a></td><td>CorneAussems</td><td>Mobile app</td><td>309</td></tr>
+</tbody>
+</table>
+
+<h4>Operator-side defenses shipped</h4>
+<div class="hooks-list">
+<strong><a href="https://github.com/gaebalai/cc-guard/pull/328">PR #328</a> — two hooks targeting the multi-account boundary:</strong>
+<ul style="margin: 0.4rem 0 0 1rem; padding: 0;">
+<li><code>account-routing-preflight.sh</code> — SessionStart hook that refuses execution when the active account doesn't match the working-directory's expected account (prevents accidental cross-account commits).</li>
+<li><code>account-billing-log.sh</code> — Stop hook that logs per-account billing reconciliation events so usage can be attributed correctly post-hoc.</li>
+</ul>
+</div>
+
+<h4>Reading material</h4>
+<p style="font-size: 0.93rem;">
+<a href="https://gist.github.com/gaebalai/d880ecc984af5d664f003daf85f956e3">English operator field guide (5 alternative routes)</a> · <a href="https://gist.github.com/gaebalai/13f46cf96093ef487760efcfb2c1c2b8">Japanese operator field guide</a> · <a href="https://gist.github.com/gaebalai/fc73fec611cc277c756e2102e067e807">7-question persona-based self-audit (interactive HTML)</a>.
+</p>
+
+<h4>Competitive landscape</h4>
+<p style="font-size: 0.93rem;">Independent OSS tools targeting this gap total ~348 stars across 8+ repos (e.g., <code>tickernelz/opencode-kiro-auth</code> 134★, <code>andyvandaric/opencode-ag-auth</code> 68★, <code>quinnjr/claude-code-profiles</code> 38★, <code>KarpelesLab/teamclaude</code> 27★). Market is saturated for direct switching tools; cc-guard hooks target the adjacent reconciliation/safety surface where existing tools are weak.</p>
+
+<h4>Upstream status</h4>
+<p style="font-size: 0.93rem;">No upstream fix. #18435 has been open 8+ months. Will be the core theme of cc-guard's <strong>June 2026 issue</strong> (ships 6/1, edit 5/30, proof 5/31).</p>
+</div>
+
+<h2 id="cluster-agents-md">Cluster 3: AGENTS.md interop</h2>
+
+<div class="cluster">
+<div class="cluster-header">
+<span class="cluster-title">Largest single feature request in Claude Code's tracker</span>
+<span class="cluster-status status-active">ACTIVE (13+ months)</span>
+</div>
+<div class="cluster-meta">
+<span><strong>Issues:</strong> 2 primary + 173 mentions</span>
+<span><strong>Reactions:</strong> 5,405 (combined)</span>
+<span><strong>First filed:</strong> 2025-04-21 (#6235)</span>
+<span><strong>Cluster framing:</strong> 2026-05-26</span>
+</div>
+
+<p>Claude Code uses its own <code>CLAUDE.md</code> instruction-file format; the rest of the agent ecosystem (Codex, Cursor, Amp, Aider) is converging on <a href="https://agents.md/">AGENTS.md</a> as a shared standard. Users who run multiple agent tools must maintain duplicate instruction files. <a href="https://github.com/anthropics/claude-code/issues/6235">#6235</a> is the largest single feature request in the Claude Code repository — 5,185 reactions over 13+ months without an official position.</p>
+
+<h4>The cases</h4>
+<table class="cases-table">
+<thead><tr><th>Issue</th><th>Reactions</th><th>Status</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/6235">#6235</a></td><td>5,185</td><td>open</td><td>Filed 2025-04-21, the largest feature request in the tracker</td></tr>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/31005">#31005</a></td><td>220</td><td>open</td><td>Filed 2026-03, follow-up requesting AGENTS.md + .agents/skills/</td></tr>
+<tr><td colspan="2"><em>173 additional issues</em></td><td colspan="2"><em>mention AGENTS.md in body or comments</em></td></tr>
+</tbody>
+</table>
+
+<h4>Operator-side defenses</h4>
+<p style="font-size: 0.93rem;">Two cc-guard hooks shipped covering the two actionable moments: <code>agents-md-sync-checker</code> (SessionStart, PR #377) detects drift at the start of a session and surfaces the candidate-path enumeration; <code>agents-md-edit-drift-warner</code> (PostToolUse on Edit / Write / MultiEdit, PR #420) catches the drift at the actual edit moment — when the operator is mid-flow on the change and the diff is still in head, the cheapest correction point. The two hooks compose: the edit-time warner is the in-the-loop signal, the SessionStart checker is the backstop for drift the operator deferred. Five operator-side routes remain documented for the unhooked angles: symlink (<code>ln -s CLAUDE.md AGENTS.md</code>), pre-commit hook sync, <code>direnv</code> environment variable, CI sync verification, and runtime-mirror via a third companion hook. <a href="https://gist.github.com/gaebalai/d36197848911f025add142abefcde685">English field guide (3,500 words)</a>. <a href="https://gist.github.com/gaebalai/bb22e61a75904771e0c88a0335f5fbfa">6-question interactive self-audit</a>.</p>
+
+<h4>Competitive landscape</h4>
+<p style="font-size: 0.93rem;">Direct sync tools total ~400 stars: <code>agent-sh/agnix</code> (258★, active development as of 2026-05-24, validation tool), <code>iannuttall/source-agents</code> (125★, sync tool), <code>intellectronica/claude-agentsmd</code> (17★, Claude Code-specific). Adjacent context: <code>ciembor/agent-rules-books</code> (1,593★), <code>wshobson/agents</code> (35,933★).</p>
+
+<h4>Upstream status</h4>
+<p style="font-size: 0.93rem;">No official statement. Will be the core theme of cc-guard's <strong>July 2026 issue</strong> (early draft already at ~20,000 characters as of 2026-05-26).</p>
+</div>
+
+<h2 id="cluster-pro-max">Cluster 4: Pro Max quota anomaly</h2>
+
+<div class="cluster">
+<div class="cluster-header">
+<span class="cluster-title">Five-month quota-consumption divergence cluster</span>
+<span class="cluster-status status-active">ACTIVE (5+ months)</span>
+</div>
+<div class="cluster-meta">
+<span><strong>Issues:</strong> 10</span>
+<span><strong>Reactions:</strong> ~2,200 (combined)</span>
+<span><strong>First filed:</strong> 2026-01-03 (#16157)</span>
+<span><strong>Cluster framing:</strong> 2026-05-26</span>
+</div>
+
+<p>Ten independent issues over five months describing the same family of symptoms: Pro Max plan users hitting quota limits abnormally fast, with multiple time-window boundary signals (2026-03-23, v2.1.89, v2.1.100, v2.1.1). The cluster includes server-side measurable evidence (<a href="https://github.com/anthropics/claude-code/issues/46917">#46917</a> with reproducible cache_creation inflation of ~20K tokens).</p>
+
+<h4>The core three cases (1,460 combined reactions)</h4>
+<table class="cases-table">
+<thead><tr><th>Issue</th><th>Filed</th><th>Reactions</th><th>One-line summary</th></tr></thead>
+<tbody>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/16157">#16157</a></td><td>2026-01-03</td><td>717</td><td>Instantly hitting Max-plan usage limits after 3-day non-use</td></tr>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/38335">#38335</a></td><td>2026-03-24</td><td>525</td><td>5-hour window quota exhausting abnormally fast since 2026-03-23 (specific boundary date)</td></tr>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/46917">#46917</a></td><td>2026-04-12</td><td>218</td><td>v2.1.100+ inflates cache_creation by ~20K tokens vs v2.1.98 (server-side, reproducible)</td></tr>
+</tbody>
+</table>
+
+<h4>Operator-side defenses shipped</h4>
+<div class="hooks-list">
+<strong>Two cc-guard hooks targeting the cluster:</strong>
+<ul style="margin: 0.4rem 0 0 1rem; padding: 0;">
+<li><a href="https://github.com/gaebalai/cc-guard/pull/340">PR #340 cache-creation-drift-detector</a> — PostToolUse hook that compares per-session cache_creation against a trailing-window average and surfaces drift warnings (operator-side analog of #46917's server-side evidence).</li>
+<li><a href="https://github.com/gaebalai/cc-guard/pull/342">PR #342 version-bump-detector</a> — SessionStart hook that warns when the active Claude Code version crosses a documented boundary (2.1.89, 2.1.100, 2.1.1).</li>
+</ul>
+</div>
+
+<h4>Reading material</h4>
+<p style="font-size: 0.93rem;">
+<a href="https://gist.github.com/gaebalai/158436e88d169406593d55bd84f0d7e9">English operator field guide (Pro Max quota anomaly: 5 measurement routes, 2,639 words)</a>. Cites <code>ccusage</code> (14,647★, the dominant external measurement tool), raw JSONL inspection, the claude-code-logger proxy, the cc-guard hook, and Anthropic Console comparison.
+</p>
+
+<h4>Upstream status</h4>
+<p style="font-size: 0.93rem;">No upstream fix as of 2026-05-26. The cluster spans 5 months without an official statement on the cache_creation inflation. Candidate theme for cc-guard's <strong>August 2026 issue</strong>.</p>
+</div>
+
+<h2 id="cluster-tui-ux">Cluster 5: TUI / Terminal UX</h2>
+
+<div class="cluster">
+<div class="cluster-header">
+<span class="cluster-title">Thirteen-month rendering-layer divergence cluster</span>
+<span class="cluster-status status-active">ACTIVE (13+ months)</span>
+</div>
+<div class="cluster-meta">
+<span><strong>Issues:</strong> 6</span>
+<span><strong>Reactions:</strong> ~2,106 (combined)</span>
+<span><strong>First filed:</strong> 2025-04-12 (#769)</span>
+<span><strong>Cluster framing:</strong> 2026-05-26</span>
+</div>
+
+<p>Claude Code's TUI text buffer and rendering layer (built on a custom Ink/React-for-CLI stack) does not integrate cleanly with terminal emulator native behaviors — scroll, redraw, copy buffer, IME composition. Six issues filed across 13 months describe distinct surface symptoms (scroll-to-top, flicker, IME composition, copy/paste indentation) that share one architectural root: the TUI re-renders screen state in a way that competes with the emulator's native scroll buffer and input handling. Five of six issues carry the official <code>area:tui</code> label (and three carry <code>oncall</code>), so Anthropic acknowledges the cluster — but no structural fix has shipped in 13 months.</p>
+
+<h4>The six cases</h4>
+<table class="cases-table">
+<thead><tr><th>Issue</th><th>Filed</th><th>Reactions</th><th>Platform</th><th>One-line symptom</th></tr></thead>
+<tbody>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/826">#826</a></td><td>2025-04-19</td><td>819</td><td>macOS / iTerm2</td><td>Console scrolls to top of history when text is added (long sessions)</td></tr>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/769">#769</a></td><td>2025-04-12</td><td>329</td><td>Windows / Ubuntu</td><td>In-progress call causes screen flickering</td></tr>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/1913">#1913</a></td><td>2025-06-10</td><td>316</td><td>multi</td><td>Terminal flickering (video repro attached)</td></tr>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/1547">#1547</a></td><td>2025-06-04</td><td>259</td><td>macOS</td><td>IME input causes performance issues + duplicate conversion candidates</td></tr>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/18170">#18170</a></td><td>2026-01-14</td><td>250</td><td>multi</td><td>Copy/paste from terminal includes unwanted indentation + trailing spaces</td></tr>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/36582">#36582</a></td><td>2026-03-20</td><td>133</td><td>macOS</td><td>Terminal scrolls to top when conversation gets long</td></tr>
+</tbody>
+</table>
+
+<h4>Operator-side defenses (terminal-level workarounds)</h4>
+<p style="font-size: 0.93rem;">No cc-guard hook ships for this cluster — the failure surface is at the terminal emulator boundary, not at the Claude Code hook surface. Operator-side mitigations documented in the field:</p>
+<ul style="font-size: 0.93rem;">
+<li><strong>Alternative terminal emulator selection</strong> — Alacritty, WezTerm, kitty have different scroll/flicker characteristics than iTerm2/Windows Terminal. The #826 macOS/iTerm2 symptom is reportedly absent or muted in Alacritty and kitty.</li>
+<li><strong>tmux as intermediary</strong> — Run Claude Code inside tmux; rely on tmux's scroll buffer and copy-mode for the operations the TUI breaks. Trades terminal-native UX for tmux's known-good behavior.</li>
+<li><strong>Transcript-based review</strong> — Use <code>~/.claude/projects/*.jsonl</code> session logs for review/grep rather than scrolling the TUI. This is the cc-guard core integration point, but the use case here is post-hoc review, not in-session interaction.</li>
+</ul>
+
+<h4>Why this cluster matters operationally (even without direct $$ impact)</h4>
+<p style="font-size: 0.93rem;">This is the only cluster of the seven with no direct revenue or quota impact — the failure mode is friction, not loss. But the cluster partly explains the 1,127 unique CLI users / 30 stars disparity on cc-guard (a 2.7% star rate, well below the 5-10% baseline for actively-used dev tools): users who hit TUI friction tend to disengage from public surfaces (stars, issues, PRs) even when they continue using the underlying tool. The cluster is included here for completeness — it shapes user behavior even where there is no direct cost impact.</p>
+
+<h4>Upstream status</h4>
+<p style="font-size: 0.93rem;">Five of six issues acknowledged with <code>area:tui</code> label; three with <code>oncall</code>. No structural fix in 13 months. The TUI rendering layer is a Claude Code architectural choice (custom React-for-CLI stack) and fixing the cluster requires either rebuilding on a different TUI layer or extensive integration work with terminal emulators' scroll/redraw protocols.</p>
+</div>
+
+<h2 id="cluster-permission">Cluster 6: Permission matching boundary</h2>
+
+<div class="cluster">
+<div class="cluster-header">
+<span class="cluster-title">Nine-month permission-rule enforcement gap, 30+ issues, meta-issue with no staff engagement</span>
+<span class="cluster-status status-active">ACTIVE (9+ months)</span>
+</div>
+<div class="cluster-meta">
+<span><strong>Issues:</strong> 25+ (30+ via meta-issue #30519)</span>
+<span><strong>Reactions:</strong> ~804+ (combined, top 25 area:permissions issues, plus the newly surfaced Axis 8 in #62437)</span>
+<span><strong>First filed:</strong> 2025-08 (#5140)</span>
+<span><strong>Cluster framing:</strong> 2026-05-26</span>
+</div>
+
+<p>Users configure <code>allow</code>, <code>deny</code>, and <code>ask</code> rules in <code>settings.json</code> expecting them to match the bash commands Claude generates. The matching engine has eight independent failure axes (seven from meta-issue #30519, plus an eighth surfaced 2026-05-26 in #62437) that combine to make wildcards, "Always Allow," scope hierarchy, and PreToolUse hook enforcement unreliable in practice. Meta-issue <a href="https://github.com/anthropics/claude-code/issues/30519">#30519</a> (filed 2026-03-03, 71 reactions) articulates the original seven axes with 13 referenced sub-issues and documents zero Anthropic staff engagement across 9 months. A second meta-issue, <a href="https://github.com/anthropics/claude-code/issues/39523">#39523</a> (16 reactions), tracks specifically the bypass-mode regression with "9-month trail, 12+ duplicates."</p>
+
+<h4>The eight failure axes</h4>
+<ol style="font-size: 0.93rem;">
+<li><strong>Wildcards don't match compound commands.</strong> <code>Bash(git:*)</code> doesn't match <code>git add file &amp;&amp; git commit -m "msg"</code>. The <code>*</code> only spans a single simple command, but Claude generates compound bash constantly.</li>
+<li><strong>"Always Allow" saves dead rules.</strong> Approving <code>git commit -m "fix typo"</code> saves the verbatim string; next time the message differs, it prompts again. <code>settings.local.json</code> accumulates hundreds of one-off rules.</li>
+<li><strong>User-level scope doesn't apply at project level.</strong> Rules in <code>~/.claude/settings.json</code> appear in <code>/permissions</code> output but match nothing; same rules in project-level <code>settings.local.json</code> work.</li>
+<li><strong>Quote-tracking bypasses allow list.</strong> Commands with quote characters in <code>#</code> comments trigger a safety warning that ignores all allow rules.</li>
+<li><strong>Deny rules have the same bugs.</strong> Multiline commands and flag-reordering bypass deny rules — so the system isn't just annoying, it's not enforcing the safety constraints users configured.</li>
+<li><strong>Colon vs space syntax contradicts.</strong> <code>Bash(git:*)</code> and <code>Bash(git *)</code> behave differently; docs disagree on which is correct; "Always Allow" generates one syntax while users configure the other.</li>
+<li><strong>Bypass-mode is partially broken.</strong> <code>--dangerously-skip-permissions</code> doesn't bypass Edit prompts (#36192), Cowork scheduled tasks ignore "Always allow" (#47180), and the flag itself stopped working entirely after v2.1.77 (#36168).</li>
+<li><strong>Session approval suppresses PreToolUse hook deny (2026-05-26).</strong> Once a static <code>ask</code> rule like <code>Bash(docker --host:*)</code> is session-approved, subsequent matching commands bypass the PreToolUse hook entirely — the hook's <code>permissionDecision: deny</code> output is never reached. A session-cached approval of a broad pattern silently whitelists destructive subcommands the hook is explicitly denying. New axis surfaced by issue <a href="https://github.com/anthropics/claude-code/issues/62437">#62437</a>.</li>
+</ol>
+
+<h4>Representative cases (top 14 by reactions)</h4>
+<table class="cases-table">
+<thead><tr><th>Issue</th><th>Filed</th><th>Reactions</th><th>State</th><th>One-line symptom</th></tr></thead>
+<tbody>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/28240">#28240</a></td><td>2026-02-22</td><td>180</td><td>open</td><td>Permission prompt triggers on <code>cd</code> in compound bash, not the actual command</td></tr>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/30519">#30519</a> (meta)</td><td>2026-03-03</td><td>71</td><td>open</td><td>Permissions matching fundamentally broken — 30+ open issues, no staff engagement</td></tr>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/29214">#29214</a></td><td>2026-02-25</td><td>71</td><td>open</td><td>Remote Control: mobile app shows permission prompts despite <code>--dangerously-skip-permissions</code></td></tr>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/11380">#11380</a></td><td>2025-11</td><td>64</td><td>closed</td><td>Claude continually asks for permission even after "always allow"</td></tr>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/36168">#36168</a></td><td>2026-03</td><td>63</td><td>open</td><td>Bypass/dangerously-skip-permissions broken in all CC versions newer than v2.1.77</td></tr>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/43713">#43713</a></td><td>2026-04</td><td>50</td><td>open</td><td><code>autoAllowBashIfSandboxed</code> bypassed for commands with shell expansions</td></tr>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/6850">#6850</a></td><td>2025-08</td><td>45</td><td>open</td><td><code>settings.local.json</code> allow not working — keeps asking, wants to re-add existing items</td></tr>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/18160">#18160</a></td><td>2026-01</td><td>41</td><td>open</td><td>Claude ignoring <code>allow</code> permissions in global <code>settings.json</code></td></tr>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/30435">#30435</a></td><td>2026-03</td><td>39</td><td>open</td><td>Allow suppressing bash safety heuristic prompts via settings</td></tr>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/5140">#5140</a></td><td>2025-08</td><td>33</td><td>open</td><td>Permissions from user <code>settings.json</code> not applied at project level</td></tr>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/31373">#31373</a></td><td>2026-03</td><td>31</td><td>open</td><td>Should not encourage <code>$(...)</code> in system prompt — causes prompt spam</td></tr>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/35954">#35954</a></td><td>2026-03</td><td>26</td><td>open</td><td>Add option to disable "Contains backslash-escaped whitespace" warning</td></tr>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/32985">#32985</a></td><td>2026-03</td><td>24</td><td>open</td><td>Allow configuring auto-approval for <code>cd+git</code> compound commands</td></tr>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/47180">#47180</a></td><td>2026-05</td><td>23</td><td>open</td><td>Cowork scheduled tasks ignore "Always allow" folder/tool permissions</td></tr>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/62437">#62437</a></td><td>2026-05-26</td><td>0</td><td>open</td><td>PreToolUse hook not invoked after a static ask rule receives session-level approval (Axis 8)</td></tr>
+</tbody>
+</table>
+
+<h4>Operator-side defenses (1 of 4 axis-specific hooks shipped, 3 in design)</h4>
+<p style="font-size: 0.93rem;">Two hooks ship now: <code>subagent-permission-mode-guard.sh</code> (permission-adjacent, Issue #55691) covers the sub-agent <code>permissionMode</code> override boundary, and <code>always-allow-pattern-suggester.sh</code> (PR #359, main-merged 2026-05-27) addresses Axis 2 directly. Three hook designs remain in the pipeline (2026-05 to 2026-06):</p>
+<ul style="font-size: 0.93rem;">
+<li><strong><code>compound-bash-permission-resolver.sh</code></strong> — PreToolUse hook that parses compound bash and re-checks each component against permission rules independently. Addresses Axis 1 (wildcard compound mismatch). <em>In design.</em></li>
+<li><strong><code>always-allow-pattern-suggester.sh</code></strong> — PreToolUse Bash hook that suggests a wildcard <code>Bash(&lt;bin&gt; &lt;subcommand&gt;:*)</code> pattern as a stderr advisory instead of the verbatim string "Always Allow" would save. 42 tests, never blocks, four-config-location existing-pattern suppression, environment toggles (<code>CC_PATTERN_SUGGESTER_DISABLE</code>, <code>CC_PATTERN_SUGGESTER_VERBOSE</code>). Addresses Axis 2 (dead rule accumulation). <em>Shipped 2026-05-27 in <a href="https://github.com/gaebalai/cc-guard/pull/359">PR #359</a>.</em></li>
+<li><strong><code>deny-rule-integrity-verifier.sh</code></strong> — PreToolUse hook that normalizes commands before deny-rule comparison so multiline and flag-reordering variants are caught. Addresses Axis 5 (deny rule bypass). <em>In design.</em></li>
+<li><strong><code>bypass-mode-effective-verifier.sh</code></strong> — SessionStart hook that, when <code>--dangerously-skip-permissions</code> is active, tests whether the bypass actually applies to all tool surfaces and warns the operator about known exceptions (Edit, Cowork). Addresses Axis 7 (partial bypass). <em>In design.</em></li>
+</ul>
+
+<h4>Upstream status</h4>
+<p style="font-size: 0.93rem;">Meta-issue <a href="https://github.com/anthropics/claude-code/issues/30519">#30519</a> documents zero Anthropic staff engagement across 30+ issues over 9 months. One workaround comment in September 2025 didn't fix anything. No milestones, no Anthropic-authored PRs, no roadmap, no tracking issue. The community is now writing custom Python <code>PreToolUse</code> hooks to reimplement permission enforcement (#18846), which is the option the meta-issue identifies as "what people are actually doing." This is a security-relevant subsystem where the documented contract diverges materially from the runtime behavior.</p>
+</div>
+
+<h2 id="cluster-skills">Cluster 7: Skills metadata and loading</h2>
+
+<div class="cluster">
+<div class="cluster-header">
+<span class="cluster-title">10+ open issues in 14 days across area:skills, four failure modes, zero Anthropic-side fix</span>
+<span class="cluster-status status-active">ACTIVE (May 2026, expanding)</span>
+</div>
+<div class="cluster-meta">
+<span><strong>Issues:</strong> 10+ (area:skills) + 20+ (area:agent-view related)</span>
+<span><strong>Reactions:</strong> ~100+ combined (cluster is new; reaction-count growth signal)</span>
+<span><strong>First filed:</strong> 2026-05 (area:skills label rolled out 2026-05-17)</span>
+<span><strong>Cluster framing:</strong> 2026-05-26</span>
+</div>
+
+<p>Claude Code's Skills feature (added in v2.x) exhibits a coherent class of failures in metadata fabrication, frontmatter respect, discovery, and partial loading. The runtime accepts non-existent settings fields without validation; the documented <code>paths:</code> auto-load trigger does not fire; the <code>argument-hint:</code> frontmatter is not displayed; the agent view loads skills incompletely. No first-class observability for which skill is active during a given tool call exists.</p>
+
+<h4>The four failure modes</h4>
+<ol style="font-size: 0.93rem;">
+<li><strong>Settings fabrication.</strong> Sub-agents write non-existent fields (e.g. <code>disabledSkills</code>) into <code>~/.claude/settings.json</code> with no validation. The write succeeds, restart succeeds, the targeted skills remain active. Silent no-op. (<a href="https://github.com/anthropics/claude-code/issues/62421">#62421</a>)</li>
+<li><strong>Frontmatter not honored.</strong> The documented <code>paths:</code> auto-load trigger never fires; <code>argument-hint:</code> is replaced by <code>...</code> ellipsis in the slash command hint area. (<a href="https://github.com/anthropics/claude-code/issues/62049">#62049</a>, <a href="https://github.com/anthropics/claude-code/issues/62127">#62127</a>)</li>
+<li><strong>Discovery doesn't match docs.</strong> <code>.claude/skills/</code> discovery via parent walk and <code>additionalDirectories</code> does not produce the documented effect in nested git repo layouts. (<a href="https://github.com/anthropics/claude-code/issues/62237">#62237</a>)</li>
+<li><strong>Partial loading and hook integration gaps.</strong> The "claude agents" interface starts the sub-agent before skills finish loading; PreToolUse hooks have no first-class way to know which skill is active. (<a href="https://github.com/anthropics/claude-code/issues/62386">#62386</a>, <a href="https://github.com/anthropics/claude-code/issues/62108">#62108</a>, <a href="https://github.com/anthropics/claude-code/issues/62078">#62078</a>)</li>
+</ol>
+
+<h4>Representative cases (top 9 of the 14-day window)</h4>
+<table class="cases-table">
+<thead><tr><th>Issue</th><th>Filed</th><th>State</th><th>One-line symptom</th></tr></thead>
+<tbody>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/62421">#62421</a></td><td>2026-05-26</td><td>open</td><td>LLM agents fabricate non-existent <code>disabledSkills</code> setting — silent no-op</td></tr>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/62049">#62049</a></td><td>2026-05-24</td><td>open</td><td><code>paths:</code> frontmatter never triggers skill auto-loading</td></tr>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/62127">#62127</a></td><td>2026-05-25</td><td>open</td><td><code>argument-hint</code> frontmatter not displayed in slash command hint area</td></tr>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/62237">#62237</a></td><td>2026-05-25</td><td>open</td><td>Skill discovery via parent-walk and <code>additionalDirectories</code> doesn't match docs</td></tr>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/62386">#62386</a></td><td>2026-05-26</td><td>open</td><td>Claude agents interface: incomplete skill loading</td></tr>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/62108">#62108</a></td><td>2026-05-25</td><td>open</td><td>Add <code>active_skill</code> field to PreToolUse hook input</td></tr>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/62078">#62078</a></td><td>2026-05-24</td><td>open</td><td>Expose current skill name as env var to hooks</td></tr>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/62259">#62259</a></td><td>2026-05-25</td><td>open</td><td>Allow user override of sandbox auto-deny on <code>.claude/skills/</code></td></tr>
+<tr><td><a href="https://github.com/anthropics/claude-code/issues/62409">#62409</a></td><td>2026-05-26</td><td>open</td><td>Plugin skill shadows built-in <code>/release-notes</code> slash command</td></tr>
+</tbody>
+</table>
+
+<h4>Operator-side defenses (hook integration in design)</h4>
+<p style="font-size: 0.93rem;">Three hook designs in the pipeline (June 2026):</p>
+<ul style="font-size: 0.93rem;">
+<li><strong><code>skills-settings-validator.sh</code></strong> — SessionStart hook that detects non-existent fields like <code>disabledSkills</code> in <code>settings.json</code> and warns. Addresses Mode 1 (settings fabrication).</li>
+<li><strong><code>skills-load-verifier.sh</code></strong> — UserPromptSubmit hook that compares loaded skills against <code>~/.claude/skills/</code> and <code>.claude/skills/</code> directory contents. Addresses Mode 2 and Mode 4.</li>
+<li><strong><code>skills-context-recorder.sh</code></strong> — PreToolUse/PostToolUse hook that records the active skill at each tool call. Workaround for Mode 4 hook integration gap.</li>
+</ul>
+
+<h4>Upstream status</h4>
+<p style="font-size: 0.93rem;">All area:skills issues filed since the label rollout (2026-05-17) remain open. No Anthropic staff engagement signal across the cluster. Skills is a v2.x feature; the 14-day filing rate of 10+ issues since label rollout is the strongest signal that the feature shipped without the validation and observability primitives that the documented behavior implies.</p>
+
+<h4>Where to read more</h4>
+<p style="font-size: 0.93rem;"><a href="https://gist.github.com/gaebalai/d00b2d32505ef67572baacbd6fad3d77">Skills Metadata and Loading cluster field report</a> (2,106 words, four failure modes, six issues with deep-dive, three detection paths, four defense paths). For the cross-cluster framework synthesis, see the <a href="https://gist.github.com/gaebalai/f6b5524b0e88fd9443d62fb44ba1619e">9-Cluster Framework</a> (3,300 words).</p>
+</div>
+
+<div class="cluster">
+<h2 id="cluster-server-side-injection">Cluster 8: Server-side prompt injection (v2.1.150+)</h2>
+
+<p>Claude Code v2.1.150 introduces a function (named <code>nAA</code> in the minified source) that reads an arbitrary string from two network-backed channels and registers it as a peer-level section of the system prompt — sitting alongside the documented <code>anti_verbosity</code>, <code>thinking_guidance</code>, and <code>action_caution</code> sections. The two channels are the <code>bootstrap</code> API <code>client_data</code> field (validated only as <code>z.record(z.unknown())</code>, cached to disk) and the GrowthBook feature flag <code>tengu_heron_brook</code> (refreshing every 60 seconds in the background, also cached to disk). Whatever value Anthropic assigns to these channels gets injected into the agent's instructions, with shell access, with no client-side audit trail.</p>
+
+<h4>Anthropic's stance</h4>
+<p style="font-size: 0.93rem;">Confirmed intentional on the issue thread: "We sometimes run experiments on changes to our system prompt." Two opt-out env vars exist: <code>CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1</code> (disables bootstrap client_data) and <code>DISABLE_GROWTHBOOK=1</code> (disables tengu_heron_brook sync). The opt-outs close the injection channel but do not produce an audit trail of what was injected before the operator opted out, or what would have been injected after.</p>
+
+<h4>Representative issues</h4>
+<ul style="font-size: 0.93rem;">
+<li><a href="https://github.com/anthropics/claude-code/issues/62061">#62061</a> — 46+ reactions in 3 days, central report by @vladkens with bytecode-level evidence of the injection channel.</li>
+<li>Predecessor: <a href="https://github.com/anthropics/claude-code/issues/25141">#25141</a> (transparency for experimental features) and <a href="https://github.com/anthropics/claude-code/issues/28941">#28941</a> (unauthorized server-side feature flag push).</li>
+<li>Parallel v2.1.150 regression bundle: 42+ co-occurring issues forming a parallel regression cluster.</li>
+</ul>
+
+<h4>Defense path shipped (1 of 4)</h4>
+<ul style="font-size: 0.93rem;">
+<li><strong><a href="https://github.com/gaebalai/cc-guard/pull/383"><code>server-side-prompt-injection-detector.sh</code></a></strong> — SessionStart hook, advisory-only, never blocks. Prints a one-line stderr advisory if either opt-out env var is missing. Self-silences with <code>CC_PROMPT_INJECTION_DETECTOR_QUIET=1</code>.</li>
+</ul>
+
+<h4>Defense paths in design (3 of 4)</h4>
+<ul style="font-size: 0.93rem;">
+<li><strong><code>cache-residue-detector.sh</code></strong> — Detects old injected values cached to disk that persist after opt-out.</li>
+<li><strong><code>proxy-capture-suggester.sh</code></strong> — Surfaces the HTTPS proxy capture path for compliance-bound operators.</li>
+<li><strong><code>system-prompt-baseline-checker.sh</code></strong> — Diffs the operator's baseline system prompt against the runtime system prompt (requires proxy capture).</li>
+</ul>
+
+<h4>Upstream status</h4>
+<p style="font-size: 0.93rem;">Acknowledged intentional in the same-day Anthropic comment. Opt-out env vars provided. Audit trail gap remains as the structural concern: operators in regulated industries cannot reconstruct what their agent was instructed at the time of a given logged action.</p>
+
+<h4>Where to read more</h4>
+<p style="font-size: 0.93rem;"><a href="https://gist.github.com/gaebalai/03839b3c3f88e1cce38fb0f2c127544d">v2.1.150 server-side prompt injection audit paths</a> (1,133 words, four audit paths).</p>
+</div>
+
+<div class="cluster">
+<h2 id="cluster-aup-false-positive">Cluster 9: Usage Policy classifier over-trigger (AUP)</h2>
+
+<p>Starting 2026-05-18, the Anthropic server-side Usage Policy classifier began over-triggering on benign Claude Code prompts. 25+ open issues filed between 2026-05-18 and 2026-05-27, including single-word "hi" greetings, ordinary code reads, and non-English benign input (Russian, Polish, Spanish). The block fires server-side before the prompt reaches the model. The classifier is non-deterministic on identical input — the same prompt blocks one attempt and passes the next.</p>
+
+<h4>Cluster signature (three converging axes)</h4>
+<ul style="font-size: 0.93rem;">
+<li><strong>Model-specific.</strong> Opus 4.7, 4.6, and 1M variants are affected. Sonnet variants of the same user with the same workflow are not. The split is consistent across all 25+ reports.</li>
+<li><strong>Multilingual.</strong> False positives reproduce on English, Russian (<a href="https://github.com/anthropics/claude-code/issues/62065">#62065</a>), Polish (<a href="https://github.com/anthropics/claude-code/issues/62373">#62373</a>), and Spanish input.</li>
+<li><strong>Domain-independent.</strong> Kernel security audits, biomedical research, FPGA waveform analysis, compression algorithm work, and plain greetings all trigger the block.</li>
+</ul>
+
+<h4>Representative issues</h4>
+<ul style="font-size: 0.93rem;">
+<li><a href="https://github.com/anthropics/claude-code/issues/60366">#60366</a> — 16 reactions, 30 comments, single-word "hi" blocked. Earliest filed report (2026-05-18).</li>
+<li><a href="https://github.com/anthropics/claude-code/issues/62190">#62190</a> — 10 reactions, non-deterministic blocks on benign prompts.</li>
+<li><a href="https://github.com/anthropics/claude-code/issues/61889">#61889</a> — CVP-approved user still blocked on benign queries. Indicates CVP approval is not currently sufficient to exempt approved users from this cluster.</li>
+<li>20+ lower-reaction independent reports between <a href="https://github.com/anthropics/claude-code/issues/61056">#61056</a> and <a href="https://github.com/anthropics/claude-code/issues/62712">#62712</a>.</li>
+<li>Single-day peak: 12 independent reports filed 2026-05-23.</li>
+</ul>
+
+<h4>Four operator-side mitigation paths</h4>
+<ol style="font-size: 0.93rem;">
+<li><strong>Swap to Sonnet</strong> for affected sessions (<code>export ANTHROPIC_MODEL=claude-sonnet-4-7</code>). Highest-leverage immediate workaround; the cluster signature is Opus-specific.</li>
+<li><strong>Warm up the session</strong> with project context before sensitive prompts. Cold sessions hit the classifier at a noticeably higher rate than warmed sessions.</li>
+<li><strong>Apply for the Cyber Verification Program (CVP)</strong>. Long-term path; note that #61889 reports CVP approval is not currently sufficient to exempt approved users from this specific cluster.</li>
+<li><strong>Retry on identical input</strong>. The classifier is non-deterministic; reports describe the same prompt passing on attempt 2 or 3 with no other change.</li>
+</ol>
+
+<h4>Defense path shipped (1 of 3)</h4>
+<ul style="font-size: 0.93rem;">
+<li><strong><a href="https://github.com/gaebalai/cc-guard/pull/388"><code>aup-false-positive-helper.sh</code></a></strong> — SessionStart hook, opt-in advisory only, never blocks. Inspects <code>ANTHROPIC_MODEL</code>; when an Opus variant is pinned and <code>CC_AUP_FALSE_POSITIVE_HELPER_REMIND=1</code> is set, emits a four-path advisory to stderr. 16 tests covering all 6 state paths.</li>
+</ul>
+
+<h4>Defense paths in design (2 of 3)</h4>
+<ul style="font-size: 0.93rem;">
+<li><strong><code>aup-block-pattern-logger.sh</code></strong> (2027-01) — PostToolUse hook that logs AUP block patterns for ongoing classifier-shift detection.</li>
+<li><strong><code>model-swap-suggester.sh</code></strong> (2027-02) — Runtime detector for AUP blocks that suggests model swap automatically.</li>
+</ul>
+
+<h4>Upstream status</h4>
+<p style="font-size: 0.93rem;">No explicit Anthropic comment on the cluster as of 2026-05-28. <code>github-actions[bot]</code> has auto-grouped at least three duplicate chains, confirming intake-side recognition. No public fix timeline.</p>
+
+<h4>Where to read more</h4>
+<p style="font-size: 0.93rem;"><a href="https://gist.github.com/gaebalai/4fa4751044be45bd83345601ee79c2db">Claude Code's AUP False-Positive Cluster: 4 Operator-Side Paths Through It</a> (1,462 words, the four paths with reproducible examples). Companion <a href="https://htmlpreview.github.io/?https://gist.githubusercontent.com/gaebalai/ddd7b7487fb114543b33479cacaa36b6/raw/cluster-9-aup-diagnostic.html">interactive 4-question diagnostic</a> outputs the highest-leverage path tailored to your model / frequency / domain / CVP status.</p>
+</div>
+
+<h2 id="cluster-growthbook">Cluster 10: GrowthBook A/B flag client-side overrides</h2>
+
+<div class="cluster">
+<div class="cluster-header">
+<span class="cluster-title">Server-pushed feature flags rewriting client-side state and dispatch behavior</span>
+<span class="cluster-status status-active">ACTIVE</span>
+</div>
+<div class="cluster-meta">
+<span><strong>Issues:</strong> 58</span>
+<span><strong>Reactions:</strong> ~30</span>
+<span><strong>First filing:</strong> 2026-05-14</span>
+<span><strong>Root-cause analysis:</strong> 2026-05-25 (<a href="https://github.com/anthropics/claude-code/issues/62205">#62205</a>)</span>
+<span><strong>Cluster framing:</strong> 2026-05-28</span>
+</div>
+
+<p>Starting around 2026-05-14 a 2-week surge of bug reports surfaced one common shape: client behavior changing without a release boundary or changelog entry. The reporter <a href="https://github.com/anthropics/claude-code/issues/62205">#62205</a> (2026-05-25) traced the macOS Desktop variant to GrowthBook A/B feature flags being sync'd from the server every ~9 minutes and silently overriding the user's local <code>settings.json</code> — <code>permissions.defaultMode: bypassPermissions</code> flipping back to <code>acceptEdits</code>. The same shape applies on different surfaces: <a href="https://github.com/anthropics/claude-code/issues/63015">#63015</a> (2026-05-28) suspects <code>tengu_compact_cache_prefix</code> gating an auto-compact dispatch rewrite that silently fails to fire.</p>
+
+<h4>Cluster signature (three converging axes)</h4>
+<ul style="font-size: 0.93rem;">
+<li><strong>Periodic re-sync.</strong> Even after the user deletes a flag from <code>~/Library/Application Support/Claude/cachedGrowthBookFeatures</code>, the next ~9-minute sync restores it. Local edits do not persist.</li>
+<li><strong>No release boundary.</strong> Behavior changes mid-version (within v2.1.X). Changelog entries are absent because no client release happened.</li>
+<li><strong>Five override paths documented.</strong> <code>claude_desktop_config.json</code>, <code>~/Library/Application Support/Claude/</code>, <code>epitaxy-folder-permission-mode</code>, <code>cachedGrowthBookFeatures</code>, and Harbor-related flags. The set is observed, not exhaustive.</li>
+</ul>
+
+<h4>Representative issues</h4>
+<ul style="font-size: 0.93rem;">
+<li><a href="https://github.com/anthropics/claude-code/issues/62205">#62205</a> — 0 reactions, 4 comments. The decisive root-cause analysis: <code>tengu_permission_friction</code> and <code>tengu_quill_harbor</code> overriding <code>permissions.defaultMode</code> on ~9-minute cadence.</li>
+<li><a href="https://github.com/anthropics/claude-code/issues/63015">#63015</a> — 0 reactions, 2 comments. Auto-compact never triggers despite client statusline reporting "100% context used". Suspects <code>tengu_compact_cache_prefix</code> gating a new compaction implementation. Quantitative evidence: 5 timestamps + token deltas + monotonic growth past trigger.</li>
+<li>56 additional issues filed 2026-05-14 onward sharing the "behavior changed but no version bump" shape.</li>
+</ul>
+
+<h4>Operator-side diagnostic paths</h4>
+<ol style="font-size: 0.93rem;">
+<li><strong>Inspect the cache directly.</strong> <code>cat ~/Library/Application\ Support/Claude/cachedGrowthBookFeatures | jq '.features | keys'</code> (macOS Desktop) or grep for <code>tengu_</code> prefixed keys in <code>~/.claude.json</code> (CLI). Lists the flags currently sync'd to your account.</li>
+<li><strong>Watch for re-sync.</strong> <code>stat -f %m ~/Library/Application\ Support/Claude/cachedGrowthBookFeatures</code> every 30s for 15 minutes. If the mtime advances on the same ~9-minute cadence #62205 documented, you're being re-sync'd.</li>
+<li><strong>Compare transcripts across versions.</strong> When a behavior regression is suspected, diffing a transcript from the prior version against the current version for the affected event (e.g., <code>compact_boundary</code> events) is the cleanest local confirmation that a dispatch path went silent.</li>
+</ol>
+
+<h4>Defense paths shipped (3 of 3)</h4>
+<p style="font-size: 0.93rem; color: #475569;">Operator-side surface for this cluster is narrow: neither hooks nor <code>settings.json</code> overrides reach the dispatch path or the server-side flag rollout. The shipped defenses are observational, not preventive — they make the silent server-side changes visible at session boundaries so the operator can react.</p>
+<ul style="font-size: 0.93rem;">
+<li><strong><code>growthbook-flag-monitor.sh</code></strong> — SessionStart hook that snapshots <code>cachedGrowthBookFeatures</code> per session and emits a one-screen stderr advisory listing added / removed / changed flags between sessions. Auto-detects macOS and Linux Desktop cache locations and the <code>~/.claude.json</code> nested form. Default digest-only mode (forensic mode opt-in via <code>CC_GROWTHBOOK_MONITOR_FULL=1</code>). <em>Shipped 2026-05-28 in PR #413, 28 tests passing.</em></li>
+<li><strong><code>compact-dispatch-watchdog.sh</code></strong> — Stop hook that tracks token usage and warns when usage crosses ~85% without a recent <code>compact_boundary</code> event in the transcript. Recovery is manual <code>/compact</code>. Addresses <a href="https://github.com/anthropics/claude-code/issues/63015">#63015</a> (the <code>tengu_compact_cache_prefix</code> silent-failure variant of the same cluster). <em>Shipped 2026-05-28 in PR #402.</em></li>
+<li><strong><code>permission-mode-drift-guard.sh</code></strong> — PermissionRequest fallback detection hook that records the initial permission mode at SessionStart and warns when unexpected permission prompts indicate the mode has drifted mid-session. Uses the <code>ConfigChange</code> event when available (v2.1.83+) and heuristic detection otherwise. Originally shipped for <a href="https://github.com/anthropics/claude-code/issues/39057">#39057</a> and recovers the Cluster 10 use case as the operator-side surface for <code>tengu_permission_friction</code> / <code>tengu_quill_harbor</code>. <em>Shipped 2026-04 in PR series, integrated into Cluster 10 framing 2026-05-28.</em></li>
+</ul>
+
+<h4>Upstream status</h4>
+<p style="font-size: 0.93rem;">No public Anthropic acknowledgment of the broader pattern as of 2026-05-28. <a href="https://github.com/anthropics/claude-code/issues/62205">#62205</a>'s root-cause analysis has 4 comments but no engineering response. The 5 override paths are observed in production, not in any official documentation.</p>
+
+<h4>Where to read more</h4>
+<p style="font-size: 0.93rem;">Full 5-override-path enumeration and the diagnostic <code>jq</code> queries against <code>cachedGrowthBookFeatures</code> available in the cc-guard examples directory.</p>
+</div>
+
+<h2 id="cluster-cowork">Cluster 11: Cowork sandbox / Desktop remote-control failure surface</h2>
+
+<div class="cluster-section">
+
+<h4>Architectural axis</h4>
+<p>Claude Code's new Cowork surface (the Claude desktop app's sandboxed remote-control session) is a different distribution path than the CLI or the existing Desktop surfaces. Hooks defined in <code>~/.claude/settings.json</code> do not fire in the Cowork sandbox, which narrows the operator-side defense surface relative to clusters 1-10. The 2-week filing surge (195 open issues filed between 2026-05-14 and 2026-05-28, ~17/day pace) does not show in any single high-reaction issue — instead it shows in the volume of independent users hitting different failure modes at the boundary of the new surface.</p>
+
+<h4>Sub-clusters within Cluster 11</h4>
+
+<p style="font-size: 0.94rem; margin-bottom: 0.5rem;">Four sub-clusters articulated from the 195-issue window:</p>
+
+<ul style="font-size: 0.93rem;">
+<li><strong>11A — Filesystem / mount / path (5-issue sub-cluster):</strong> <a href="https://github.com/anthropics/claude-code/issues/63013">#63013</a> (Live Artifacts folder path migration with no auto-migrate), <a href="https://github.com/anthropics/claude-code/issues/62933">#62933</a> (Dropbox mount failure on macOS), <a href="https://github.com/anthropics/claude-code/issues/62932">#62932</a> (FUSE mount serving stale inodes session-wide, silently corrupting bash git output — structurally the SOH cluster shape on a different surface), <a href="https://github.com/anthropics/claude-code/issues/62859">#62859</a> (Cowork doesn't load <code>~/.claude/CLAUDE.md</code> at session start), <a href="https://github.com/anthropics/claude-code/issues/55206">#55206</a> (Windows: <code>unlink</code> syscall denied at the FUSE layer regardless of POSIX permissions — structural rejection, not a Windows-handle race; <code>git add</code> partially succeeds and leaves a stuck <code>.git/index.lock</code> the bash sandbox cannot remove; full git write path broken until PowerShell-side cleanup). The five-issue sub-cluster spans the entire FUSE bridge spec: content cache (#62932), metadata cache (#62932), pre-existing-file visibility (#40973, closed), unlink syscall (#55206), and configuration auto-load (#62859). The `cowork-fuse-staleness-watcher` hook below partially covers the unlink-denial case by warning before `git add` / `commit` / `rm` against the mount.</li>
+<li><strong>11B — Platform / binary mismatch:</strong> <a href="https://github.com/anthropics/claude-code/issues/63000">#63000</a> (Linux ELF binary downloaded on macOS Sonoma 14.8.7), <a href="https://github.com/anthropics/claude-code/issues/62984">#62984</a> (Tailscale VPN detection blocks Cowork).</li>
+<li><strong>11C — Subscription boundary / access:</strong> <a href="https://github.com/anthropics/claude-code/issues/62893">#62893</a> (Cowork and Code chat history becomes inaccessible after subscription ends), <a href="https://github.com/anthropics/claude-code/issues/62949">#62949</a> (Cowork Desktop only shows Sonnet 4.6 1M, standard 200K tier missing).</li>
+<li><strong>11D — Infrastructure incident reports:</strong> <a href="https://github.com/anthropics/claude-code/issues/62873">#62873</a> (Cowork Infrastructure Incident Report from an individual user perspective).</li>
+</ul>
+
+<h4>Defense status (operator-side)</h4>
+
+<ul style="font-size: 0.93rem;">
+<li><strong><code>cowork-claudemd-helper.sh</code></strong> — Standalone script (not a hook, because hooks don't fire in Cowork) that reads <code>~/.claude/CLAUDE.md</code> and the project's <code>.claude/CLAUDE.md</code>, formats them with section headers Cowork's chat can render, and optionally copies the result to the clipboard via <code>pbcopy</code> / <code>wl-copy</code> / <code>xclip</code>. Workaround for <a href="https://github.com/anthropics/claude-code/issues/62859">#62859</a>. <em>Shipped 2026-05-28 in PR #403, 40 tests passing.</em></li>
+<li><strong><code>cowork-claude-md-load-checker</code></strong> — SessionStart hook (CLI-side) that surfaces <code>~/.claude/CLAUDE.md</code> at every session start with a reminder block referencing <a href="https://github.com/anthropics/claude-code/issues/62859">#62859</a>. Complements the standalone helper script: CLI users on the same machine get an automatic reminder to paste the file manually when they switch to a Cowork session. <em>Shipped 2026-05-28 in PR #409, 20 tests passing.</em></li>
+<li><strong><code>cowork-fuse-staleness-watcher</code></strong> — PreToolUse hook (Bash matcher) that detects working-tree git operations (<code>git status / add / commit / diff / restore / stash</code>) inside the Cowork FUSE mount path (<code>/sessions/&lt;id&gt;/mnt/</code>). Warns about the <a href="https://github.com/anthropics/claude-code/issues/62932">#62932</a> P1 wedge where bash file reads return frozen content while Cowork's first-class Read / Edit / Write tools and ref-walking git commands stay clean. Stays silent on safe ref-only operations. <em>Shipped 2026-05-28 in PR #410, 25 tests passing.</em></li>
+<li><strong><code>cowork-model-picker-advisor</code></strong> — SessionStart hook (CLI-side) that inspects <code>$ANTHROPIC_MODEL</code> and surfaces the silent <code>sonnet[1m]</code> default that the Cowork Desktop model picker enforces (<a href="https://github.com/anthropics/claude-code/issues/62949">#62949</a>). Articulates the <code>--model claude-sonnet-4-6</code> CLI workaround and the usage-credit risk for Max-plan users. Related: <a href="https://github.com/anthropics/claude-code/issues/61869">#61869</a>, <a href="https://github.com/anthropics/claude-code/issues/62100">#62100</a>, <a href="https://github.com/anthropics/claude-code/issues/61692">#61692</a>. <em>Shipped 2026-05-28 in PR #411, 25 tests passing.</em></li>
+</ul>
+
+<h4>Why the defense surface is narrow</h4>
+<p style="font-size: 0.93rem;">Cowork runs in the Claude desktop app's GUI sandbox, not the CLI. Hooks defined in <code>~/.claude/settings.json</code> do not fire in that environment. This is the same constraint that made the original cluster framing acknowledge the narrow defense surface. Standalone scripts (the <code>cowork-claudemd-helper</code> shape) and operator workflow changes are the only operator-side surfaces that reach the user before they start their Cowork session.</p>
+
+<h4>Upstream status</h4>
+<p style="font-size: 0.93rem;">Cowork is a new surface (rolled out in May 2026), so the 195-issue volume reflects launch-window discovery rather than a long-standing failure pattern. Anthropic has acknowledged individual infrastructure incidents (<a href="https://github.com/anthropics/claude-code/issues/62873">#62873</a> is a public incident report) but the broader cross-issue pattern is not formally articulated upstream.</p>
+
+<h4>Where to read more</h4>
+<p style="font-size: 0.93rem;">FUSE-staleness and capability-detector hooks are on the cc-guard roadmap.</p>
+</div>
+
+<h2 id="cluster-tool-call-parsing">Cluster 12: Tool Call Parsing failures in Opus 4.7</h2>
+
+<div class="cluster-section">
+
+<h4>Architectural axis</h4>
+<p>Opus 4.7 reaches a turn where the model intends to call a tool. The model emits a tool-use block. The harness reports back: <em>the model's tool call could not be parsed; retry also failed</em>. The session halts. Five filings between 2026-04-17 and 2026-05-27 pin four independent root-cause hypotheses for the same surface symptom — each consistent with the data the filer observed, none colliding with the others, together articulating four distinct mechanisms that could produce the central <a href="https://github.com/anthropics/claude-code/issues/62123">#62123</a> symptom.</p>
+
+<h4>Sub-clusters within Cluster 12</h4>
+
+<ul style="font-size: 0.93rem;">
+<li><strong>12A — In-context few-shot poisoning</strong> (<a href="https://github.com/anthropics/claude-code/issues/62344">#62344</a>): Once one malformed tool call lands in conversation history, the model anchors on it and subsequent calls of the same type copy the broken format. Self-perpetuating; not self-recoverable. <code>/clear</code> is the only recovery, at the cost of the accumulated session state.</li>
+<li><strong>12B — Extended-thinking serialization defect</strong> (<a href="https://github.com/anthropics/claude-code/issues/62467">#62467</a>): When Opus 4.7's extended thinking is active, the assistant turn can have <code>stop_reason="tool_use"</code> but no parseable tool_use block in the message — only a thinking block. The reporter observed ~20 retry prompts across 6 sessions. Output size and special characters are not the cause; the common factor is Opus 4.7 + extended thinking.</li>
+<li><strong>12C — Spurious malformed notice</strong> (<a href="https://github.com/anthropics/claude-code/issues/62700">#62700</a>): The tool call <em>actually executes successfully</em> at the harness layer (git commits land, gh queries return, file writes take effect), and then the harness emits the system message <em>"Your tool call was malformed and could not be parsed. Please retry."</em> The model's narrative matches reality; the harness's articulation is the false negative — structurally a peer of the SOH dispatch-fabrication shape but in the opposite direction.</li>
+<li><strong>12D — Legacy XML format mix precursor</strong> (<a href="https://github.com/anthropics/claude-code/issues/49747">#49747</a>, filed 2026-04-17): On longer payloads, Opus 4.7 mixes legacy XML tool-use format into what should be JSON tool calls. The model's training data contains both formats; the current API contract uses JSON exclusively; on long payloads, attention dilution lets XML leak into the JSON stream. This filing predates the May 25-27 surge by more than a month and is the precursor signal for the cluster.</li>
+</ul>
+
+<h4>Defense status (operator-side)</h4>
+
+<p style="font-size: 0.93rem;">The cluster's recovery surface is structurally narrower than the previously catalogued clusters. The earlier clusters (sub-agent observability, permission matching, etc.) all had operator-side defenses that could be installed via hooks — cc-guard ships forty-plus production hooks against those clusters. The tool-call parsing cluster's recovery surface is narrower because the recovery requires interventions at layers (model attention, harness parser, serialization layer) that hooks cannot reach. The closest hook-shaped defenses are <em>advisory</em>:</p>
+
+<ul style="font-size: 0.93rem;">
+<li><strong><code>long-session-malformed-tool-call-detector</code></strong> — PostToolUse hook that scans the trailing transcript for the "malformed and could not be parsed" marker and emits a one-screen advisory naming sub-pattern 12A, the <code>/clear</code> recovery path, and the context-loss trade-off. Rate-limited per session via a counter file so the warning does not repeat on every PostToolUse after the first detection. <em>Shipped 2026-05-28 in PR #406, 40 tests passing.</em></li>
+<li><strong><code>extended-thinking-tool-use-mismatch-detector</code></strong> — PostToolUse hook that scans the trailing transcript for assistant turns with <code>stop_reason="tool_use"</code> but no parseable tool_use content block (only thinking and/or text blocks), the structural signal for sub-pattern 12B. Emits a one-screen advisory naming 12B, distinguishing it from 12A (so the operator does not waste a <code>/clear</code> on a defect that re-fires in fresh sessions), and pointing at model-layer workarounds: switch to a Sonnet variant for the affected task, disable extended thinking via <code>/model</code> when Opus standard mode is sufficient, or break the work into smaller sub-tasks. Threshold defaults to 2 (single mismatches can occur from unrelated edge cases), with cooldown rate-limiting repeat advisories per session. <em>Shipped 2026-05-28 in PR #419, 43 tests passing.</em></li>
+<li><strong><code>spurious-malformed-notice-cross-checker</code></strong> — Compares the harness's malformed notice against the tool's actual execution result and flags the discrepancy. <em>In design for January-February 2027.</em></li>
+<li><strong><code>long-payload-attention-dilution-advisory</code></strong> — Warns when payload size crosses a threshold correlated with sub-pattern 12D's XML-mix shape. <em>In design for February 2027.</em></li>
+</ul>
+
+<h4>Upstream status</h4>
+<p style="font-size: 0.93rem;">No public Anthropic acknowledgment of the broader pattern as of 2026-05-28. The central case <a href="https://github.com/anthropics/claude-code/issues/62123">#62123</a> has 21 reactions and 10 comments but no engineering response. The four sub-clusters pin distinct mechanisms; the upstream fix surface depends on which mechanism Anthropic prioritizes.</p>
+
+<h4>Where to read more</h4>
+<p style="font-size: 0.93rem;">Free preview Gist articulating all four sub-clusters and the recovery limits: <a href="https://gist.github.com/gaebalai/12f64f34cef016917824af913bc6f1b8">Tool Call Parsing Failures in Opus 4.7 — A Five-Issue Cluster</a> (1,982 words, MIT).</p>
+</div>
+
+<h2>How clusters are detected and tracked</h2>
+
+<p>The clusters above are not curated from internal data — they are reconstructed from public GitHub Issues, public reaction counts, and public release notes. Anyone can verify the cluster framing against the underlying evidence. The monthly cadence is:</p>
+
+<ol style="font-size: 0.94rem;">
+<li><strong>Continuous Issue scanning.</strong> The top ~50 most-reacted open issues in <code>anthropics/claude-code</code> are reviewed weekly. Reaction-count growth + filing-date proximity surface candidate clusters.</li>
+<li><strong>Sub-pattern articulation.</strong> Once 3+ issues share a structural shape, the cluster is framed (architectural axis, sub-pattern enumeration, lifecycle event mapping).</li>
+<li><strong>Defense hook implementation.</strong> Where possible, an operator-side cc-guard hook is built that detects or prevents the failure shape. Each hook ships as a PR with tests.</li>
+<li><strong>Monthly synthesis.</strong> The cc-guard monthly issue compiles the month's cluster findings into a single readable chapter (12,000-20,000 characters per cluster), with install walkthroughs, evidence links, and the operator-side cadence to monitor for ongoing changes.</li>
+</ol>
+
+<p style="font-size: 0.93rem; color: #475569;">The twelve clusters tracked here represent <strong>~11,820 combined user reactions across 400+ issues</strong>. None has an official upstream fix as of 2026-05-28. Operator-side defenses (hooks or terminal-level workarounds) cover nine of twelve clusters at the symptom level; the permission matching cluster (Cluster 6) has two shipped hooks with three axis-specific hooks remaining in design, the Skills metadata cluster (Cluster 7) has one shipped hook with two more in design for June 2026, the v2.1.150 server-side prompt injection cluster (Cluster 8) has one shipped hook with three audit hooks in design, the AUP false-positive cluster (Cluster 9) has one shipped hook with two more in design for January-February 2027, the GrowthBook A/B override cluster (Cluster 10) has three shipped observational hooks (growthbook-flag-monitor, compact-dispatch-watchdog, permission-mode-drift-guard) covering all three defense paths in the original design — the server-pushed dispatch path itself remains unreachable from any operator surface, the Cowork sandbox cluster (Cluster 11) has one shipped standalone script (the helper script — hooks don't fire in the Cowork sandbox itself) plus three shipped CLI-side hooks (cowork-claude-md-load-checker, cowork-fuse-staleness-watcher, cowork-model-picker-advisor) that warn CLI users about Cowork-shaped failures before they switch surfaces, and the Tool Call Parsing cluster (Cluster 12) has two shipped advisory hooks (long-session-malformed-tool-call-detector for sub-pattern 12A, PR #406; extended-thinking-tool-use-mismatch-detector for sub-pattern 12B, PR #419) with two more in design for January-February 2027 (the recovery surface is structurally narrower because hooks cannot reach the layers — model attention, harness parser, serialization layer — where the failure originates; the advisory hooks at least point operators at the correct workaround layer per sub-pattern).</p>
+
+<div class="cta-box">
+<h2 style="font-size: 1.3rem;">Track new failure-mode clusters as they emerge</h2>
+<div style="margin-top: 1rem;">
+<a href="https://github.com/gaebalai/cc-guard" class="btn">View on GitHub</a>
+</div>
+<p style="margin: 1rem 0 0 0; font-size: 0.85rem; color: #78350f;">
+Free previews: <a href="https://gist.github.com/gaebalai/3559ac89670576709f5b7a45a5150a6d" style="color: #78350f;">May 2026 issue, full first chapter (3,500 words, English)</a> · <a href="https://gist.github.com/gaebalai/81c37d24b8e8be7360eef54386d49ba6" style="color: #78350f;">June 2026 issue preview (multi-account cluster opening, ~1,500 chars)</a>
+</p>
+</div>
+
+<h2>Related artifacts</h2>
+
+<ul style="font-size: 0.93rem;">
+<li><strong>One-time books that capture frozen snapshots of clusters:</strong>
+  <ul>
+    <li> ($19, 130 cases of claim-vs-runtime divergence)</li>
+    <li> ($19, ships 2026-05-27, the SOH cluster in depth)</li>
+    <li><a href="https://github.com/gaebalai/cc-guard">cc-guard</a> ($19, the 9-layer claim-vs-reality cluster + 4 migration paths)</li>
+    <li> (10 production incidents with hooks)</li>
+  </ul>
+</li>
+<li><strong>Operator-side defense library:</strong> <a href="https://github.com/gaebalai/cc-guard">cc-guard</a> (all hooks MIT, 765+ examples, 14-day unique users: 1,127 as of 2026-05-27)</li>
+<li><strong>Diagnostic tools (free, browser-only):</strong> <a href="https://claudecode.to/cc-guard/token-checkup.html">Token Checkup</a>, <a href="https://claudecode.to/cc-guard/security-checkup.html">Security Checkup</a>, <a href="https://claudecode.to/cc-guard/version-check.html">Version Check</a></li>
+<li><strong>Free articulations published 2026-05-27 (alongside the Cluster 6 hooks shipping that day):</strong>
+  <ul>
+    <li><a href="https://gist.github.com/gaebalai/c51fedd9b51079c35c62a74f08bf7816">Operator-Side Defense as a Wrapper Layer</a> — design philosophy behind cc-guard's 765+ hooks; three wrapper sub-patterns (advisory / receipt-emitting / validation-gating); four-check evaluation framework for third-party hooks (2,791 words)</li>
+    <li><a href="https://gist.github.com/gaebalai/2886d513b7e668a70a7e654edf33fa79">Cluster 6 Defense Status Update</a> — install paths and operator checklists for the two shipped Cluster 6 hooks (always-allow-pattern-suggester PR #359, bypass-mode-effective-verifier PR #360); 1,628 words</li>
+    <li><a href="https://gist.github.com/gaebalai/94dc7344ac222c89c15521ada164923f">Post-Cliff Operator's Calendar</a> — week-by-week navigation guide for the first 30 days AFTER the June 15 billing split lands; 5 weekly phases (verification → validation → correction → measurement → lock-in); 2,390 words</li>
+  </ul>
+</li>
+<li><strong>Free interactive tools published 2026-05-27 (browser-only, no signup):</strong>
+  <ul>
+    <li><a href="https://htmlpreview.github.io/?https://gist.githubusercontent.com/gaebalai/b6aa6a75731c8e4768da71cfee7bd457/raw/soh-chapter-selector.html">SOH Chapter Selector</a> — picks which of the 7 SOH chapters to read first (5 questions, 3 min)</li>
+    <li><a href="https://htmlpreview.github.io/?https://gist.githubusercontent.com/gaebalai/3ceb225094ab886b3b6d30d10cd760d1/raw/cost-of-inaction-calculator.html">Cost-of-Inaction Calculator</a> — quantifies doing-nothing cost vs preparation cost over 14/30/90 days post-June-15 (5 questions, 3 min)</li>
+    <li><a href="https://htmlpreview.github.io/?https://gist.githubusercontent.com/gaebalai/73bcd6b7214fef8fa171738206ff84dc/raw/hook-recommender.html">Hook Recommender</a> — narrows 765+ hooks to a 3-5 starter pack matched to your cluster + setup + risk (5 questions, 3 min)</li>
+  </ul>
+</li>
+</ul>
+
+<p class="footnote">
+This page is updated as clusters evolve. Last update: 2026-05-28 (Clusters 11 and 12 added: Cowork sandbox / Desktop remote-control failure surface, and Tool Call Parsing failures in Opus 4.7). Author: <a href="https://github.com/gaebalai">gaebalai</a>. Cluster framings are independent operator-side analysis, not affiliated with Anthropic. Reaction counts and issue states are read from the public GitHub API at update time.
+</p>
+
+</body>
+</html>
