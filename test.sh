@@ -974,7 +974,7 @@ echo ""
 echo "--- --share tests ---"
 
 SHARE_OUT=$(node "$CLI" --share 2>&1) || true
-if echo "$SHARE_OUT" | grep -q "gaebalai.github.io"; then echo "  PASS: --share generates URL"; PASS=$((PASS + 1)); else echo "  FAIL: --share should generate URL"; FAIL=$((FAIL + 1)); fi
+if echo "$SHARE_OUT" | grep -q "claudecode.to/cc-guard"; then echo "  PASS: --share generates URL"; PASS=$((PASS + 1)); else echo "  FAIL: --share should generate URL"; FAIL=$((FAIL + 1)); fi
 echo ""
 
 # ========================
