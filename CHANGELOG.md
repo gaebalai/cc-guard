@@ -5,7 +5,7 @@
 Initial stable release. Consolidated all prior development into a single 1.0.0 milestone.
 
 ### Core
-- One-command install: `npx cc-guard` deploys 8 safety hooks in 10 seconds, zero dependencies.
+- One-command install: `npx @gaebalai/cc-guard` deploys 8 safety hooks in 10 seconds, zero dependencies.
 - 8 built-in hooks:
   - destructive-guard (rm -rf, git reset --hard, git clean, sudo rm -rf, PowerShell Remove-Item, WSL2 /mnt paths)
   - branch-guard (main/master push protection, --force on all branches, force-with-lease, HEAD:main)

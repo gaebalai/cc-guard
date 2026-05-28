@@ -18,7 +18,7 @@ Permissions are binary: allow or deny. Hooks are programmable: inspect the comma
 ## Step 1: Audit Your Current Setup
 
 ```bash
-npx cc-guard --audit
+npx @gaebalai/cc-guard --audit
 ```
 
 This scores your current settings (0-100) and shows what's missing.
@@ -113,7 +113,7 @@ This means you can keep your working `allow` rules and layer hooks on top for th
 ## Step 3: Install Everything Automatically
 
 ```bash
-npx cc-guard
+npx @gaebalai/cc-guard
 ```
 
 This creates the hook scripts and merges the config into your existing settings.json. Your current `permissions` are preserved.
@@ -121,13 +121,13 @@ This creates the hook scripts and merges the config into your existing settings.
 ## Step 4: Verify
 
 ```bash
-npx cc-guard --verify
+npx @gaebalai/cc-guard --verify
 ```
 
 Tests each hook with sample inputs. If something fails:
 
 ```bash
-npx cc-guard --doctor
+npx @gaebalai/cc-guard --doctor
 ```
 
 This checks jq installation, file permissions, shebang lines, and common misconfigurations.
@@ -139,7 +139,7 @@ This checks jq installation, file permissions, shebang lines, and common misconf
 You're trading speed for safety. Keep `Bash(*)` but add hooks to catch the dangerous commands:
 
 ```bash
-npx cc-guard
+npx @gaebalai/cc-guard
 ```
 
 Now `Bash(*)` auto-approves commands, but hooks still run and block dangerous ones. Best of both worlds.
@@ -207,13 +207,13 @@ echo $?  # Should be 2 (blocked)
 Watch what's being blocked in real time:
 
 ```bash
-npx cc-guard --watch
+npx @gaebalai/cc-guard --watch
 ```
 
 After a few sessions, generate custom hooks from your block patterns:
 
 ```bash
-npx cc-guard --learn
+npx @gaebalai/cc-guard --learn
 ```
 
 ## Resources

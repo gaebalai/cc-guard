@@ -47,7 +47,7 @@ Commands that auto-execute without prompting.
 - Compound commands don't match: `Bash(git:*)` won't match `cd /path && git log` ([#30519](https://github.com/anthropics/claude-code/issues/30519), [#16561](https://github.com/anthropics/claude-code/issues/16561))
 - "Always Allow" saves exact strings, not patterns ([#6850](https://github.com/anthropics/claude-code/issues/6850))
 - User-level settings may not apply at project level ([#5140](https://github.com/anthropics/claude-code/issues/5140))
-- **Workaround:** Use `compound-command-approver` hook: `npx cc-guard --install-example compound-command-approver`
+- **Workaround:** Use `compound-command-approver` hook: `npx @gaebalai/cc-guard --install-example compound-command-approver`
 
 ### deny
 
@@ -256,23 +256,23 @@ Commands that are always blocked.
 ### Generate This Automatically
 
 ```bash
-npx cc-guard        # Install hooks
-npx cc-guard --audit  # Check your score
-npx cc-guard --doctor # Diagnose issues
+npx @gaebalai/cc-guard        # Install hooks
+npx @gaebalai/cc-guard --audit  # Check your score
+npx @gaebalai/cc-guard --doctor # Diagnose issues
 ```
 
 ## Troubleshooting
 
 | Problem | Cause | Fix |
 |---------|-------|-----|
-| Hooks don't fire | Not registered in settings.json | `npx cc-guard` |
+| Hooks don't fire | Not registered in settings.json | `npx @gaebalai/cc-guard` |
 | Hooks don't block | Wrong exit code (not 2) | Check `echo $?` after test |
 | "jq: command not found" | jq not installed | `brew install jq` / `apt install jq` |
 | Hook permission denied | Not executable | `chmod +x ~/.claude/hooks/*.sh` |
 | Compound commands prompt | Permission system limitation | Install `compound-command-approver` |
 | "Always Allow" doesn't stick | Saves exact string, not pattern | Use hooks instead |
 
-Run `npx cc-guard --doctor` for automated diagnosis.
+Run `npx @gaebalai/cc-guard --doctor` for automated diagnosis.
 
 ## Resources
 

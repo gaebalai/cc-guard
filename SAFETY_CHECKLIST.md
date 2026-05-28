@@ -4,8 +4,8 @@ Use this checklist before running Claude Code autonomously. Copy to your project
 
 ## Before First Session
 
-- [ ] Install safety hooks: `npx cc-guard`
-- [ ] Run safety audit: `npx cc-guard --audit` (target: score ≥ 80)
+- [ ] Install safety hooks: `npx @gaebalai/cc-guard`
+- [ ] Run safety audit: `npx @gaebalai/cc-guard --audit` (target: score ≥ 80)
 - [ ] Create CLAUDE.md with project-specific rules
 - [ ] Verify .env files are in .gitignore
 - [ ] Ensure git remote is set (so work can be recovered)
@@ -14,7 +14,7 @@ Use this checklist before running Claude Code autonomously. Copy to your project
 
 - [ ] Create backup branch: `git checkout -b backup/before-autonomous-$(date +%Y%m%d)`
 - [ ] Commit all current work
-- [ ] Verify destructive-guard is blocking: `npx cc-guard --verify`
+- [ ] Verify destructive-guard is blocking: `npx @gaebalai/cc-guard --verify`
 - [ ] Check branch-guard protects main/master
 - [ ] If using database: install `block-database-wipe`
 - [ ] If sensitive configs: install `protect-dotfiles`
@@ -30,7 +30,7 @@ Use this checklist before running Claude Code autonomously. Copy to your project
 - [ ] Review git log for unexpected changes
 - [ ] Run test suite to catch regressions
 - [ ] Check if any .env files were modified
-- [ ] Review blocked-commands.log for patterns: `npx cc-guard --learn`
+- [ ] Review blocked-commands.log for patterns: `npx @gaebalai/cc-guard --learn`
 
 ## Team Setup
 
@@ -43,9 +43,9 @@ Use this checklist before running Claude Code autonomously. Copy to your project
 
 | Risk | Prevention | Install |
 |------|-----------|---------|
-| `rm -rf /` | destructive-guard | `npx cc-guard` |
-| Push to main | branch-guard | `npx cc-guard` |
-| .env committed | secret-guard | `npx cc-guard` |
+| `rm -rf /` | destructive-guard | `npx @gaebalai/cc-guard` |
+| Push to main | branch-guard | `npx @gaebalai/cc-guard` |
+| .env committed | secret-guard | `npx @gaebalai/cc-guard` |
 | Database wiped | block-database-wipe | `--install-example block-database-wipe` |
 | Dotfiles modified | protect-dotfiles | `--install-example protect-dotfiles` |
 | Deploy without commit | deploy-guard | `--install-example deploy-guard` |

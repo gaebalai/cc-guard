@@ -5,7 +5,7 @@ Your hook isn't working. Here's how to fix it, starting with the most common cau
 ## Quick Diagnosis
 
 ```bash
-npx cc-guard --doctor
+npx @gaebalai/cc-guard --doctor
 ```
 
 This checks jq, settings.json, file permissions, shebangs, and common misconfigurations. If it says "All checks passed" but hooks still don't fire, read on.
@@ -25,7 +25,7 @@ cat ~/.claude/settings.json | jq '.hooks'
 You should see your hook's path under the correct trigger. If not:
 
 ```bash
-npx cc-guard  # Re-registers all hooks
+npx @gaebalai/cc-guard  # Re-registers all hooks
 ```
 
 ### 3. Is the hook file executable?
@@ -180,7 +180,7 @@ This is a known Claude Code limitation, not a hook issue. `Bash(git:*)` doesn't 
 Fix:
 
 ```bash
-npx cc-guard --install-example compound-command-approver
+npx @gaebalai/cc-guard --install-example compound-command-approver
 ```
 
 ## "Hooks slow down Claude Code"
@@ -188,7 +188,7 @@ npx cc-guard --install-example compound-command-approver
 ### 1. Check execution time
 
 ```bash
-npx cc-guard --install-example hook-debug-wrapper
+npx @gaebalai/cc-guard --install-example hook-debug-wrapper
 # Then wrap your slow hook to see timing
 ```
 
@@ -206,7 +206,7 @@ Hooks with `"matcher": ""` run on every single tool call. Move heavy checks to s
 ### 3. Use --lint to find issues
 
 ```bash
-npx cc-guard --lint
+npx @gaebalai/cc-guard --lint
 ```
 
 Reports performance warnings and configuration issues.
@@ -216,7 +216,7 @@ Reports performance warnings and configuration issues.
 ### 1. Compare settings
 
 ```bash
-npx cc-guard --diff teammate-settings.json
+npx @gaebalai/cc-guard --diff teammate-settings.json
 ```
 
 Shows exactly what's different between your setups.
@@ -224,9 +224,9 @@ Shows exactly what's different between your setups.
 ### 2. Export and share
 
 ```bash
-npx cc-guard --export   # Creates cc-guard-export.json
+npx @gaebalai/cc-guard --export   # Creates cc-guard-export.json
 # Send to teammate
-npx cc-guard --import cc-guard-export.json
+npx @gaebalai/cc-guard --import cc-guard-export.json
 ```
 
 ### 3. Different jq versions
@@ -243,7 +243,7 @@ LOG="$HOME/.claude/blocked-commands.log"
 echo "[$(date -Iseconds)] BLOCKED: reason | cmd: $COMMAND" >> "$LOG"
 ```
 
-Then view with: `npx cc-guard --watch` or `npx cc-guard --stats`
+Then view with: `npx @gaebalai/cc-guard --watch` or `npx @gaebalai/cc-guard --stats`
 
 ## "claude -p returns empty output when Stop hook is configured"
 
@@ -253,7 +253,7 @@ This is a known Claude Code v2.1.83 bug ([#38651](https://github.com/anthropics/
 
 ```bash
 # Quick toggle: comment out Stop hooks before -p commands
-npx cc-guard --status  # See which hooks are active
+npx @gaebalai/cc-guard --status  # See which hooks are active
 # Manually comment out Stop hooks in ~/.claude/settings.json
 # Run your -p command
 # Uncomment Stop hooks after
@@ -299,8 +299,8 @@ The hook has a strict whitelist. If a command isn't on the list, it passes throu
 
 ```bash
 # Install token tracking hooks
-npx cc-guard --install-example prompt-usage-logger
-npx cc-guard --install-example compact-alert-notification
+npx @gaebalai/cc-guard --install-example prompt-usage-logger
+npx @gaebalai/cc-guard --install-example compact-alert-notification
 ```
 
 After a session, check:
@@ -363,8 +363,8 @@ If you see `input length = 0`, that hook is not receiving stdin.
 
 ## Still Stuck?
 
-1. Wrap the hook with debug wrapper: `npx cc-guard --install-example hook-debug-wrapper`
+1. Wrap the hook with debug wrapper: `npx @gaebalai/cc-guard --install-example hook-debug-wrapper`
 2. Check `~/.claude/hook-debug.log` for detailed I/O traces
-3. Run `npx cc-guard --doctor` for automated checks
+3. Run `npx @gaebalai/cc-guard --doctor` for automated checks
 4. Open an issue: [cc-guard issues](https://github.com/gaebalai/cc-guard/issues)
 

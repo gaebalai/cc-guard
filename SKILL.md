@@ -1,6 +1,6 @@
 ---
 name: cc-guard
-description: Safety hooks for Claude Code — 772 pre-built hooks that prevent file deletion, credential leaks, git disasters, and token waste during autonomous AI coding sessions. 9,228+ tests. Install with npx cc-guard.
+description: Safety hooks for Claude Code — 772 pre-built hooks that prevent file deletion, credential leaks, git disasters, and token waste during autonomous AI coding sessions. 9,228+ tests. Install with npx @gaebalai/cc-guard.
 ---
 
 # cc-guard
@@ -21,7 +21,7 @@ Installs pre-built safety hooks into your Claude Code environment. These hooks r
 ## Quick start
 
 ```bash
-npx cc-guard
+npx @gaebalai/cc-guard
 ```
 
 This runs an interactive wizard that configures hooks based on your risk profile.
@@ -29,9 +29,9 @@ This runs an interactive wizard that configures hooks based on your risk profile
 ## Install individual hooks
 
 ```bash
-npx cc-guard --install-example large-read-guard
-npx cc-guard --install-example prevent-rm-rf
-npx cc-guard --install-example git-force-push-block
+npx @gaebalai/cc-guard --install-example large-read-guard
+npx @gaebalai/cc-guard --install-example prevent-rm-rf
+npx @gaebalai/cc-guard --install-example git-force-push-block
 ```
 
 ## Why hooks instead of CLAUDE.md rules

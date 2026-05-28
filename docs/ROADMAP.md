@@ -50,8 +50,8 @@ A single screen showing everything about your Claude Code safety:
 Community-contributed hooks discoverable from CLI:
 
 ```bash
-npx cc-guard --search "database"
-npx cc-guard --install-remote user/hook-name
+npx @gaebalai/cc-guard --search "database"
+npx @gaebalai/cc-guard --install-remote user/hook-name
 ```
 
 Would require a registry (GitHub-based, no server). Defer to v5.0.

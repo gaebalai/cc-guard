@@ -16,5 +16,5 @@ labels: bug
 - jq installed: yes/no
 
 **Steps to reproduce:**
-1. `npx cc-guard`
+1. `npx @gaebalai/cc-guard`
 2. ...

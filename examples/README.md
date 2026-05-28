@@ -3,10 +3,10 @@
 677 installable hooks. Each solves a real problem from GitHub Issues or autonomous operation. 9,228+ tests.
 
 ```bash
-npx cc-guard --install-example <name>   # install one
-npx cc-guard --examples                  # list all
-npx cc-guard --examples safety           # filter by category
-npx cc-guard --shield                    # install recommended set
+npx @gaebalai/cc-guard --install-example <name>   # install one
+npx @gaebalai/cc-guard --examples                  # list all
+npx @gaebalai/cc-guard --examples safety           # filter by category
+npx @gaebalai/cc-guard --shield                    # install recommended set
 ```
 
 ## Categories
