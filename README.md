@@ -1,6 +1,6 @@
 # cc-guard
 
-**Claude Code를 안전하게 만드는 원커맨드 도구.** 772개의 example hook · 71건 이상의 Anthropic 공식 Issue에 대응 · 9,228+ 테스트 · 30K+ 누적 설치
+**Claude Code를 안전하게 만드는 원커맨드 도구.** 772개의 example hook · 71건 이상의 Anthropic 공식 Issue에 대응 · 9,228+ 테스트 · 
 
 ```bash
 npx @gaebalai/cc-guard
